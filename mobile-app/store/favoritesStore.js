@@ -28,14 +28,15 @@ const useFavoritesStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const token = useAuthStore.getState().token;
-      const res = await axios.post(
-        `${API_URL}/user/favorites`,
-        { itemId },
+      await axios.post(
+        `${API_URL}/user/favorites/${itemId}`,
+        {},
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      set({ favorites: res.data.data, loading: false });
+      await get().fetchFavorites();
+      set({ loading: false });
       return true;
     } catch (error) {
       set({
@@ -50,10 +51,11 @@ const useFavoritesStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const token = useAuthStore.getState().token;
-      const res = await axios.delete(`${API_URL}/user/favorites/${itemId}`, {
+      await axios.delete(`${API_URL}/user/favorites/${itemId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      set({ favorites: res.data.data, loading: false });
+      await get().fetchFavorites();
+      set({ loading: false });
       return true;
     } catch (error) {
       set({

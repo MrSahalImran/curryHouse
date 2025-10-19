@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../../config/config";
 import useMenuStore from "../../store/menuStore";
 import useCartStore from "../../store/cartStore";
+import useFavoritesStore from "../../store/favoritesStore";
 
 export default function MenuScreen() {
   const {
@@ -31,6 +32,13 @@ export default function MenuScreen() {
     fetchCategories();
   }, []);
 
+  const {
+    favorites = [],
+    addFavorite,
+    removeFavorite,
+    loading: favLoading,
+  } = useFavoritesStore();
+
   const filteredItems = menuItems.filter((item) => {
     const matchesCategory =
       selectedCategory === "All" || item.category === selectedCategory;
@@ -42,14 +50,33 @@ export default function MenuScreen() {
 
   const renderMenuItem = ({ item }) => {
     const quantity = getItemQuantity(item._id);
+    const isFavorite =
+      Array.isArray(favorites) && favorites.some((fav) => fav._id === item._id);
 
     return (
       <View style={styles.menuItem}>
         <Image source={{ uri: item.image }} style={styles.itemImage} />
         <View style={styles.itemDetails}>
-          <Text style={styles.itemName}>{item.name}</Text>
-          <Text style={styles.itemDescription} numberOfLines={2}>
-            {item.description}
+          <View style={styles.itemHeader}>
+            <Text style={styles.itemName}>{item.name}</Text>
+            <TouchableOpacity
+              style={styles.favoriteBtn}
+              onPress={() =>
+                isFavorite ? removeFavorite(item._id) : addFavorite(item._id)
+              }
+              disabled={favLoading}
+            >
+              <Ionicons
+                name={isFavorite ? "heart" : "heart-outline"}
+                size={22}
+                color={isFavorite ? COLORS.error : COLORS.textMuted}
+              />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.itemDescription} numberOfLines={1}>
+            {item.description.length > 40
+              ? item.description.slice(0, 40) + "..."
+              : item.description}
           </Text>
           <View style={styles.itemMeta}>
             {item.isVegetarian && (
@@ -243,6 +270,16 @@ const styles = StyleSheet.create({
   itemDetails: {
     flex: 1,
     padding: 12,
+  },
+  itemHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 2,
+  },
+  favoriteBtn: {
+    marginLeft: 8,
+    padding: 4,
   },
   itemName: {
     fontSize: 16,
