@@ -1,9 +1,9 @@
 // API Configuration
 // Use your computer's IP address when testing on a physical device
 // Change this to "http://localhost:5000/api" when using an emulator
-const API_URL = "http://192.168.29.33:5000/api";
+export const API_URL = "http://192.168.29.33:5000/api";
 
-export default {
+const config = {
   API_URL,
   endpoints: {
     auth: {
@@ -31,6 +31,8 @@ export default {
     },
   },
 };
+
+export default config;
 
 // Restaurant Info
 export const RESTAURANT_INFO = {

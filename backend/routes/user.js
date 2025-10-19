@@ -1,116 +1,54 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../models/User");
 const auth = require("../middleware/auth");
+const userController = require("../controllers/userController");
 
+// -------------------- PROFILE --------------------
 // @route   PUT /api/user/profile
 // @desc    Update user profile
 // @access  Private
-router.put("/profile", auth, async (req, res) => {
-  try {
-    const { name, phone, address, avatar } = req.body;
+router.put("/profile", auth, userController.updateProfile);
 
-    const updateFields = {};
-    if (name) updateFields.name = name;
-    if (phone) updateFields.phone = phone;
-    if (address) updateFields.address = address;
-    if (avatar) updateFields.avatar = avatar;
+// -------------------- DELIVERY ADDRESSES --------------------
+// @route   GET /api/user/addresses
+// @desc    Get user's delivery addresses
+// @access  Private
+router.get("/addresses", auth, userController.getAddresses);
 
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      { $set: updateFields },
-      { new: true, runValidators: true }
-    ).select("-password");
+// @route   POST /api/user/addresses
+// @desc    Add a new delivery address
+// @access  Private
+router.post("/addresses", auth, userController.addAddress);
 
-    res.json({
-      success: true,
-      message: "Profile updated successfully",
-      user,
-    });
-  } catch (error) {
-    console.error("Update profile error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error while updating profile",
-    });
-  }
-});
+// @route   PUT /api/user/addresses/:id
+// @desc    Update a delivery address
+// @access  Private
+router.put("/addresses/:id", auth, userController.updateAddress);
 
+// @route   PATCH /api/user/addresses/:id/default
+// @desc    Set a delivery address as default
+// @access  Private
+router.patch("/addresses/:id/default", auth, userController.setDefaultAddress);
+
+// @route   DELETE /api/user/addresses/:id
+// @desc    Delete a delivery address
+// @access  Private
+router.delete("/addresses/:id", auth, userController.deleteAddress);
+
+// -------------------- FAVORITES --------------------
 // @route   POST /api/user/favorites/:menuItemId
 // @desc    Add item to favorites
 // @access  Private
-router.post("/favorites/:menuItemId", auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id);
-
-    if (user.favorites.includes(req.params.menuItemId)) {
-      return res.status(400).json({
-        success: false,
-        message: "Item already in favorites",
-      });
-    }
-
-    user.favorites.push(req.params.menuItemId);
-    await user.save();
-
-    res.json({
-      success: true,
-      message: "Item added to favorites",
-      favorites: user.favorites,
-    });
-  } catch (error) {
-    console.error("Add favorite error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error while adding to favorites",
-    });
-  }
-});
+router.post("/favorites/:menuItemId", auth, userController.addFavorite);
 
 // @route   DELETE /api/user/favorites/:menuItemId
 // @desc    Remove item from favorites
 // @access  Private
-router.delete("/favorites/:menuItemId", auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id);
-
-    user.favorites = user.favorites.filter(
-      (id) => id.toString() !== req.params.menuItemId
-    );
-    await user.save();
-
-    res.json({
-      success: true,
-      message: "Item removed from favorites",
-      favorites: user.favorites,
-    });
-  } catch (error) {
-    console.error("Remove favorite error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error while removing from favorites",
-    });
-  }
-});
+router.delete("/favorites/:menuItemId", auth, userController.removeFavorite);
 
 // @route   GET /api/user/favorites
 // @desc    Get user's favorites
 // @access  Private
-router.get("/favorites", auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id).populate("favorites");
-
-    res.json({
-      success: true,
-      data: user.favorites,
-    });
-  } catch (error) {
-    console.error("Get favorites error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error while fetching favorites",
-    });
-  }
-});
+router.get("/favorites", auth, userController.getFavorites);
 
 module.exports = router;
