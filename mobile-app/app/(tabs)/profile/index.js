@@ -6,14 +6,18 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { COLORS, RESTAURANT_INFO } from "../../config/config";
-import useAuthStore from "../../store/authStore";
+import { COLORS, RESTAURANT_INFO } from "../../../config/config";
+import useAuthStore from "../../../store/authStore";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
+  const params = useLocalSearchParams();
+
+  // Only show profile details if on the main profile screen (no sub-route)
+  const isMainProfile = Object.keys(params).length === 0;
 
   const handleLogout = () => {
     Alert.alert("Logout", "Are you sure you want to logout?", [
@@ -31,18 +35,25 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* User Info */}
-      <View style={styles.userSection}>
-        <View style={styles.avatar}>
-          <Ionicons name="person" size={48} color={COLORS.white} />
-        </View>
-        <Text style={styles.userName}>{user?.name || "Guest User"}</Text>
-        <Text style={styles.userEmail}>{user?.email || ""}</Text>
-      </View>
+      {isMainProfile && (
+        <>
+          {/* User Info */}
+          <View style={styles.userSection}>
+            <View style={styles.avatar}>
+              <Ionicons name="person" size={48} color={COLORS.white} />
+            </View>
+            <Text style={styles.userName}>{user?.name || "Guest User"}</Text>
+            <Text style={styles.userEmail}>{user?.email || ""}</Text>
+          </View>
+        </>
+      )}
 
       {/* Menu Items */}
       <View style={styles.menuSection}>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => router.push("/profile/edit")}
+        >
           <View style={styles.menuItemLeft}>
             <Ionicons name="person-outline" size={24} color={COLORS.primary} />
             <Text style={styles.menuItemText}>Edit Profile</Text>
@@ -50,7 +61,10 @@ export default function ProfileScreen() {
           <Ionicons name="chevron-forward" size={24} color={COLORS.textMuted} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => router.push("/profile/delivery")}
+        >
           <View style={styles.menuItemLeft}>
             <Ionicons
               name="location-outline"
@@ -62,7 +76,10 @@ export default function ProfileScreen() {
           <Ionicons name="chevron-forward" size={24} color={COLORS.textMuted} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => router.push("/profile/favorites")}
+        >
           <View style={styles.menuItemLeft}>
             <Ionicons name="heart-outline" size={24} color={COLORS.primary} />
             <Text style={styles.menuItemText}>Favorites</Text>
@@ -70,7 +87,10 @@ export default function ProfileScreen() {
           <Ionicons name="chevron-forward" size={24} color={COLORS.textMuted} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => router.push("/profile/notifications")}
+        >
           <View style={styles.menuItemLeft}>
             <Ionicons
               name="notifications-outline"
@@ -84,21 +104,23 @@ export default function ProfileScreen() {
       </View>
 
       {/* Restaurant Info */}
-      <View style={styles.infoSection}>
-        <Text style={styles.sectionTitle}>Contact Us</Text>
-        <View style={styles.infoItem}>
-          <Ionicons name="call" size={20} color={COLORS.primary} />
-          <Text style={styles.infoText}>{RESTAURANT_INFO.phone}</Text>
+      {isMainProfile && (
+        <View style={styles.infoSection}>
+          <Text style={styles.sectionTitle}>Contact Us</Text>
+          <View style={styles.infoItem}>
+            <Ionicons name="call" size={20} color={COLORS.primary} />
+            <Text style={styles.infoText}>{RESTAURANT_INFO.phone}</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <Ionicons name="mail" size={20} color={COLORS.primary} />
+            <Text style={styles.infoText}>{RESTAURANT_INFO.email}</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <Ionicons name="location" size={20} color={COLORS.primary} />
+            <Text style={styles.infoText}>{RESTAURANT_INFO.address}</Text>
+          </View>
         </View>
-        <View style={styles.infoItem}>
-          <Ionicons name="mail" size={20} color={COLORS.primary} />
-          <Text style={styles.infoText}>{RESTAURANT_INFO.email}</Text>
-        </View>
-        <View style={styles.infoItem}>
-          <Ionicons name="location" size={20} color={COLORS.primary} />
-          <Text style={styles.infoText}>{RESTAURANT_INFO.address}</Text>
-        </View>
-      </View>
+      )}
 
       {/* About Section */}
       <View style={styles.menuSection}>
@@ -149,12 +171,14 @@ export default function ProfileScreen() {
       </View>
 
       {/* Logout Button */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Ionicons name="log-out-outline" size={24} color={COLORS.error} />
-        <Text style={styles.logoutText}>Logout</Text>
-      </TouchableOpacity>
+      {isMainProfile && (
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={24} color={COLORS.error} />
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
+      )}
 
-      <Text style={styles.version}>Version 1.0.0</Text>
+      {isMainProfile && <Text style={styles.version}>Version 1.0.0</Text>}
     </ScrollView>
   );
 }

@@ -98,7 +98,8 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
           ),
-          headerTitle: "My Profile",
+          // Hide the tab header so the nested Profile stack header is used
+          headerShown: false,
         }}
       />
     </Tabs>
