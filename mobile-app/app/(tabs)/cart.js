@@ -17,6 +17,7 @@ import useCartStore from "../../store/cartStore";
 import useOrderStore from "../../store/orderStore";
 import useAddressStore from "../../store/addressStore";
 import useAuthStore from "../../store/authStore";
+import AuthPromptModal from "../components/AuthPromptModal";
 import { useState, useEffect } from "react";
 
 // Optional extras catalog (static for now)
@@ -359,64 +360,6 @@ const styles = StyleSheet.create({
   notesSummaryText: {
     color: COLORS.text,
     marginTop: 4,
-  },
-  /* Auth prompt modal styles */
-  authModalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.4)",
-  },
-  authModalBox: {
-    width: "86%",
-    backgroundColor: COLORS.white,
-    borderRadius: 14,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  authTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: COLORS.text,
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  authMessage: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-    textAlign: "center",
-    marginBottom: 16,
-  },
-  authButtonsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  authCancelBtn: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 10,
-    backgroundColor: COLORS.surface,
-    alignItems: "center",
-  },
-  authCancelText: {
-    color: COLORS.text,
-    fontWeight: "600",
-  },
-  authLoginBtn: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 10,
-    backgroundColor: COLORS.primary,
-    alignItems: "center",
-  },
-  authLoginText: {
-    color: COLORS.white,
-    fontWeight: "700",
   },
 });
 
@@ -865,41 +808,15 @@ export default function CartScreen() {
         </View>
       </Modal>
 
-      {/* Auth prompt modal (styled) */}
-      <Modal
+      <AuthPromptModal
         visible={authPromptVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setAuthPromptVisible(false)}
-      >
-        <View style={styles.authModalOverlay}>
-          <View style={styles.authModalBox}>
-            <Text style={styles.authTitle}>Please login to continue</Text>
-            <Text style={styles.authMessage}>
-              You need to be signed in to place an order. Please login to
-              continue.
-            </Text>
-            <View style={styles.authButtonsRow}>
-              <TouchableOpacity
-                style={styles.authCancelBtn}
-                onPress={() => setAuthPromptVisible(false)}
-              >
-                <Text style={styles.authCancelText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.authLoginBtn}
-                onPress={() => {
-                  setAuthPromptVisible(false);
-                  setModalVisible(false);
-                  router.push("/login");
-                }}
-              >
-                <Text style={styles.authLoginText}>Login</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        onCancel={() => setAuthPromptVisible(false)}
+        onLogin={() => {
+          setAuthPromptVisible(false);
+          setModalVisible(false);
+          router.push("/login");
+        }}
+      />
     </View>
   );
 }
