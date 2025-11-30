@@ -10,6 +10,8 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RESTAURANT_INFO } from "../../../config/config";
 import useAuthStore from "../../../store/authStore";
+import AuthPromptModal from "../../components/AuthPromptModal";
+import { useState } from "react";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -22,11 +24,16 @@ export default function ProfileScreen() {
   // Helper to require authentication for protected actions
   const requireAuth = (path) => {
     if (!user) {
-      router.push("/login");
+      // show auth prompt and remember the requested route
+      setPendingRoute(path);
+      setAuthPromptVisible(true);
       return;
     }
     router.push(path);
   };
+
+  const [authPromptVisible, setAuthPromptVisible] = useState(false);
+  const [pendingRoute, setPendingRoute] = useState(null);
 
   const handleLogout = () => {
     Alert.alert("Logout", "Are you sure you want to logout?", [
@@ -199,6 +206,17 @@ export default function ProfileScreen() {
         ))}
 
       {isMainProfile && <Text style={styles.version}>Version 1.0.0</Text>}
+      <AuthPromptModal
+        message="You need to login in order to access that."
+        visible={authPromptVisible}
+        onCancel={() => setAuthPromptVisible(false)}
+        onLogin={() => {
+          setAuthPromptVisible(false);
+          const dest = pendingRoute || "/login";
+          setPendingRoute(null);
+          router.push(dest);
+        }}
+      />
     </ScrollView>
   );
 }
