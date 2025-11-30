@@ -19,6 +19,15 @@ export default function ProfileScreen() {
   // Only show profile details if on the main profile screen (no sub-route)
   const isMainProfile = Object.keys(params).length === 0;
 
+  // Helper to require authentication for protected actions
+  const requireAuth = (path) => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    router.push(path);
+  };
+
   const handleLogout = () => {
     Alert.alert("Logout", "Are you sure you want to logout?", [
       { text: "Cancel", style: "cancel" },
@@ -52,7 +61,7 @@ export default function ProfileScreen() {
       <View style={styles.menuSection}>
         <TouchableOpacity
           style={styles.menuItem}
-          onPress={() => router.push("/profile/edit")}
+          onPress={() => requireAuth("/profile/edit")}
         >
           <View style={styles.menuItemLeft}>
             <Ionicons name="person-outline" size={24} color={COLORS.primary} />
@@ -63,7 +72,7 @@ export default function ProfileScreen() {
 
         <TouchableOpacity
           style={styles.menuItem}
-          onPress={() => router.push("/profile/delivery")}
+          onPress={() => requireAuth("/profile/delivery")}
         >
           <View style={styles.menuItemLeft}>
             <Ionicons
@@ -78,7 +87,7 @@ export default function ProfileScreen() {
 
         <TouchableOpacity
           style={styles.menuItem}
-          onPress={() => router.push("/profile/favorites")}
+          onPress={() => requireAuth("/profile/favorites")}
         >
           <View style={styles.menuItemLeft}>
             <Ionicons name="heart-outline" size={24} color={COLORS.primary} />
@@ -89,7 +98,7 @@ export default function ProfileScreen() {
 
         <TouchableOpacity
           style={styles.menuItem}
-          onPress={() => router.push("/profile/notifications")}
+          onPress={() => requireAuth("/profile/notifications")}
         >
           <View style={styles.menuItemLeft}>
             <Ionicons
@@ -171,12 +180,23 @@ export default function ProfileScreen() {
       </View>
 
       {/* Logout Button */}
-      {isMainProfile && (
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={24} color={COLORS.error} />
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
-      )}
+      {isMainProfile &&
+        (user ? (
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={24} color={COLORS.error} />
+            <Text style={styles.logoutText}>Logout</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={() => router.push("/login")}
+          >
+            <Ionicons name="log-in-outline" size={24} color={COLORS.primary} />
+            <Text style={[styles.logoutText, { color: COLORS.primary }]}>
+              Login
+            </Text>
+          </TouchableOpacity>
+        ))}
 
       {isMainProfile && <Text style={styles.version}>Version 1.0.0</Text>}
     </ScrollView>
