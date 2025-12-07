@@ -212,9 +212,8 @@ export default function ProfileScreen() {
         onCancel={() => setAuthPromptVisible(false)}
         onLogin={() => {
           setAuthPromptVisible(false);
-          const dest = pendingRoute || "/login";
           setPendingRoute(null);
-          router.push(dest);
+          router.push("/login");
         }}
       />
     </ScrollView>
