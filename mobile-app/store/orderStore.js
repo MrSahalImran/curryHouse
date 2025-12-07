@@ -46,6 +46,10 @@ const useOrderStore = create((set, get) => ({
       }
     } catch (error) {
       console.error("Fetch orders error:", error);
+      if (error.response?.status === 401) {
+        set({ isLoading: false, orders: [], error: null });
+        return { success: false, unauthorized: true };
+      }
       set({
         isLoading: false,
         error: error.response?.data?.message || "Failed to fetch orders",
@@ -98,6 +102,9 @@ const useOrderStore = create((set, get) => ({
 
   // Clear current order
   clearCurrentOrder: () => set({ currentOrder: null }),
+
+  // Clear all orders (used when unauthenticated)
+  clearOrders: () => set({ orders: [], currentOrder: null, error: null }),
 
   // Clear error
   clearError: () => set({ error: null }),

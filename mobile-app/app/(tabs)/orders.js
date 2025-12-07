@@ -6,9 +6,11 @@ import {
   FlatList,
   TouchableOpacity,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../../config/config";
 import useOrderStore from "../../store/orderStore";
+import useAuthStore from "../../store/authStore";
 
 const STATUS_CONFIG = {
   pending: { icon: "time", color: COLORS.warning, label: "Pending" },
@@ -33,11 +35,17 @@ const STATUS_CONFIG = {
 };
 
 export default function OrdersScreen() {
-  const { orders, fetchOrders, isLoading } = useOrderStore();
+  const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
+  const { orders, fetchOrders, isLoading, clearOrders } = useOrderStore();
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    if (isAuthenticated) {
+      fetchOrders();
+    } else {
+      clearOrders();
+    }
+  }, [isAuthenticated]);
 
   const renderOrderItem = ({ item: order }) => {
     const statusInfo = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
@@ -103,6 +111,24 @@ export default function OrdersScreen() {
       </View>
     );
   };
+
+  if (!isAuthenticated) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Ionicons name="lock-closed" size={100} color={COLORS.textMuted} />
+        <Text style={styles.emptyText}>Please sign in</Text>
+        <Text style={styles.emptySubtext}>
+          Log in to view your orders and tracking
+        </Text>
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={() => router.push("/login")}
+        >
+          <Text style={styles.loginButtonText}>Go to Login</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   if (orders.length === 0 && !isLoading) {
     return (
@@ -250,5 +276,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textMuted,
     marginTop: 8,
+  },
+  loginButton: {
+    marginTop: 16,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  loginButtonText: {
+    color: COLORS.white,
+    fontWeight: "700",
+    fontSize: 16,
   },
 });
