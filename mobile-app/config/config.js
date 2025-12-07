@@ -1,7 +1,7 @@
 // API Configuration
 // Use your computer's IP address when testing on a physical device
 // Change this to "http://localhost:5000/api" when using an emulator
-export const API_URL = "http://10.37.135.191:5000/api";
+export const API_URL = "http://192.168.29.33:5000/api";
 
 const config = {
   API_URL,
