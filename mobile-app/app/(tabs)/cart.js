@@ -453,10 +453,11 @@ export default function CartScreen() {
         quantity: item.quantity,
         subtotal: item.price * item.quantity,
       })),
+      totalAmount: totalPrice + extrasTotalPayload,
       deliveryType: "delivery",
       paymentMethod: "cash",
-      address: selectedAddress,
-      notes: extraNotes,
+      addressId: selectedAddress,
+      specialInstructions: extraNotes,
       extras: extrasPicked,
       extrasTotal: extrasTotalPayload,
     };

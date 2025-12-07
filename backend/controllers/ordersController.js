@@ -12,23 +12,22 @@ exports.createOrder = async (req, res) => {
     } = req.body;
 
     if (!items || items.length === 0) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Order must contain at least one item",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Order must contain at least one item",
+      });
     }
 
-    const totalAmount = items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
+    const totalAmount =
+      req.body.totalAmount ||
+      items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     let resolvedAddress = null;
     if (addressId) {
       const user = req.user;
-      const addr = user.deliveryAddresses?.id?.(addressId);
+      const addr = user.deliveryAddresses?.find(
+        (a) => a._id.toString() === addressId
+      );
       if (addr) {
         resolvedAddress = {
           street: addr.street,
@@ -55,8 +54,15 @@ exports.createOrder = async (req, res) => {
       resolvedAddress = req.user.address;
     }
 
+    // Generate unique order number
+    const orderNumber = `ORD-${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2, 7)
+      .toUpperCase()}`;
+
     const order = new Order({
       user: req.user._id,
+      orderNumber,
       items,
       totalAmount,
       deliveryAddress: resolvedAddress,
@@ -68,13 +74,11 @@ exports.createOrder = async (req, res) => {
     await order.save();
     await order.populate("items.menuItem");
 
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "Order placed successfully",
-        data: order,
-      });
+    res.status(201).json({
+      success: true,
+      message: "Order placed successfully",
+      data: order,
+    });
   } catch (error) {
     console.error("Create order error:", error);
     res
