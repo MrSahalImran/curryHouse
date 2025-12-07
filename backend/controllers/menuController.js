@@ -19,12 +19,10 @@ exports.getMenu = async (req, res) => {
     res.json({ success: true, count: menuItems.length, data: menuItems });
   } catch (error) {
     console.error("Get menu error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Server error while fetching menu items",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching menu items",
+    });
   }
 };
 
@@ -34,12 +32,10 @@ exports.getCategories = async (req, res) => {
     res.json({ success: true, data: ["All", ...categories] });
   } catch (error) {
     console.error("Get categories error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Server error while fetching categories",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching categories",
+    });
   }
 };
 
@@ -53,12 +49,10 @@ exports.getItemById = async (req, res) => {
     res.json({ success: true, data: menuItem });
   } catch (error) {
     console.error("Get menu item error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Server error while fetching menu item",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching menu item",
+    });
   }
 };
 
@@ -68,11 +62,9 @@ exports.getPopularItems = async (req, res) => {
     res.json({ success: true, count: popularItems.length, data: popularItems });
   } catch (error) {
     console.error("Get popular items error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Server error while fetching popular items",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching popular items",
+    });
   }
 };

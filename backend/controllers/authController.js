@@ -3,7 +3,7 @@ const { validationResult } = require("express-validator");
 const User = require("../models/User");
 
 const generateToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "30d" });
+  return jwt.sign({ userId }, "sldkfjasldkfjlaskdjflkas", { expiresIn: "30d" });
 };
 
 exports.register = async (req, res) => {
@@ -17,26 +17,22 @@ exports.register = async (req, res) => {
 
     let user = await User.findOne({ email });
     if (user) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "User already exists with this email",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "User already exists with this email",
+      });
     }
 
     user = new User({ name, email, phone, password, address: address || {} });
     await user.save();
 
     const token = generateToken(user._id);
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "User registered successfully",
-        token,
-        user: user.toJSON(),
-      });
+    res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      token,
+      user: user.toJSON(),
+    });
   } catch (error) {
     console.error("Register error:", error);
     res
