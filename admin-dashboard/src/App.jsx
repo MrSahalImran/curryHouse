@@ -15,7 +15,6 @@ function getStatusColor(status) {
       return "#10b981"; // green
     case "cancelled":
       return "#6b7280"; // gray
-    // 'on_the_way' and 'delivered' statuses removed from admin UI
     default:
       return "#374151"; // slate
   }
@@ -28,6 +27,17 @@ function capitalizeStatus(s) {
     .split(" ")
     .map((w) => w[0]?.toUpperCase() + w.slice(1))
     .join(" ");
+}
+
+function getInitials(name) {
+  if (!name) return "C";
+  return name
+    .split(" ")
+    .map((p) => p[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 }
 
 export default function App() {
@@ -78,13 +88,21 @@ export default function App() {
       await axios.patch(`${API_URL}/orders/admin/${orderId}/status`, {
         status,
       });
-      // refresh
       fetchOrders();
     } catch (err) {
       console.error("Failed to update status", err);
       setError("Failed to update order status");
     }
   };
+
+  const statusFilters = [
+    { key: "all", label: `All (${orders.length})` },
+    { key: "pending", label: "Pending" },
+    { key: "confirmed", label: "Confirmed" },
+    { key: "preparing", label: "Preparing" },
+    { key: "ready", label: "Ready" },
+    { key: "cancelled", label: "Cancelled" },
+  ];
 
   const filteredOrders = orders.filter((o) => {
     const matchesStatus =
@@ -98,15 +116,6 @@ export default function App() {
         (o.user?.email || "").toLowerCase().includes(q))
     );
   });
-
-  const statusFilters = [
-    { key: "all", label: `All (${orders.length})` },
-    { key: "pending", label: "Pending" },
-    { key: "confirmed", label: "Confirmed" },
-    { key: "preparing", label: "Preparing" },
-    { key: "ready", label: "Ready" },
-    { key: "cancelled", label: "Cancelled" },
-  ];
 
   return (
     <div className="min-h-screen text-slate-900 dark:text-slate-100 p-6 app-bg">
@@ -225,123 +234,67 @@ export default function App() {
             filteredOrders.map((order) => (
               <article
                 key={order._id}
-                className="bg-white/95 dark:bg-slate-800/70 p-4 rounded-lg shadow-sm"
+                className="bg-white/95 dark:bg-slate-800/70 p-3 md:p-4 rounded-lg shadow-sm hover:shadow-md transition-transform transform hover:-translate-y-0.5 border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
               >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="text-lg font-bold">
-                      Order #{order.orderNumber || order._id}
+                <div className="flex items-start gap-4">
+                  <div className="flex items-center gap-3 w-56 md:w-72 min-w-0">
+                    <div className="flex-shrink-0">
+                      <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center text-orange-600 dark:text-orange-300 font-semibold">
+                        {getInitials(order.user?.name)}
+                      </div>
                     </div>
-                    <div className="text-sm text-slate-500 dark:text-slate-300">
-                      {new Date(order.createdAt).toLocaleString()}
+                    <div className="min-w-0">
+                      <div className="text-sm text-slate-500 dark:text-slate-300">
+                        Order #{order.orderNumber || order._id}
+                      </div>
+                      <div className="text-base font-semibold truncate">
+                        {order.user?.name || "Customer"}
+                      </div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        {new Date(order.createdAt).toLocaleString()}
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <span
-                      className="inline-block px-3 py-1 rounded-full text-sm font-semibold"
-                      style={{
-                        backgroundColor: getStatusColor(order.status),
-                        color: "#fff",
-                      }}
-                    >
-                      {capitalizeStatus(order.status)}
-                    </span>
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                  <div>
-                    <div className="text-sm text-slate-500 dark:text-slate-300">
-                      Customer
+                  <div className="flex-1 flex items-center justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                      <div className="text-sm text-slate-700 dark:text-slate-200 font-medium">
+                        kr {order.totalAmount || 0}
+                      </div>
+                      <div className="text-sm text-slate-500 dark:text-slate-400">
+                        {order.paymentMethod || "-"}
+                      </div>
+                      <div className="text-sm text-slate-500 dark:text-slate-400">
+                        {order.items?.length || 0} items
+                      </div>
                     </div>
-                    <div className="font-medium">
-                      {order.user?.name || "N/A"}
-                    </div>
-                    <div className="text-sm text-slate-500 dark:text-slate-300">
-                      {order.user?.email}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-slate-500 dark:text-slate-300">
-                      Delivery
-                    </div>
-                    <div className="font-medium">
-                      {order.deliveryType || "-"} — kr {order.totalAmount || 0}
-                    </div>
-                    <div className="text-sm text-slate-500 dark:text-slate-300">
-                      {order.paymentMethod || "-"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-slate-500 dark:text-slate-300">
-                      Phone
-                    </div>
-                    <div className="font-medium">
-                      {order.user?.phone || "N/A"}
-                    </div>
-                  </div>
-                </div>
 
-                {order.items?.length > 0 && (
-                  <div className="mt-4">
-                    <div className="text-sm text-slate-500 dark:text-slate-300 mb-2">
-                      Items
-                    </div>
-                    <div className="space-y-2">
-                      {order.items.map((item, i) => (
-                        <div key={i} className="flex justify-between">
-                          <div className="font-medium">
-                            {item.quantity} x {item.name}
-                          </div>
-                          <div className="font-semibold">
-                            kr {item.subtotal}
-                          </div>
-                        </div>
-                      ))}
+                    <div className="flex flex-col items-end gap-3 w-40">
+                      <span
+                        className="inline-block px-3 py-1 rounded-full text-xs font-semibold"
+                        style={{
+                          backgroundColor: getStatusColor(order.status),
+                          color: "#fff",
+                        }}
+                      >
+                        {capitalizeStatus(order.status)}
+                      </span>
+
+                      <select
+                        value={order.status}
+                        onChange={(e) =>
+                          updateOrderStatus(order._id, e.target.value)
+                        }
+                        className="w-full border rounded-md p-2 bg-white/95 dark:bg-slate-700/80 dark:border-slate-600 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-400 dark:focus:ring-orange-500 text-sm"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="preparing">Preparing</option>
+                        <option value="ready">Ready</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
                     </div>
                   </div>
-                )}
-
-                {order.deliveryAddress && (
-                  <div className="mt-4">
-                    <div className="text-sm text-slate-500 dark:text-slate-300">
-                      Delivery Address
-                    </div>
-                    <div className="font-medium">
-                      {order.deliveryAddress.street}
-                    </div>
-                    <div className="text-sm text-slate-500 dark:text-slate-300">
-                      {order.deliveryAddress.city}{" "}
-                      {order.deliveryAddress.postalCode}
-                    </div>
-                  </div>
-                )}
-
-                {order.specialInstructions && (
-                  <div className="mt-4">
-                    <div className="text-sm text-slate-500 dark:text-slate-300">
-                      Special Instructions
-                    </div>
-                    <div className="font-medium">
-                      {order.specialInstructions}
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-4">
-                  <select
-                    value={order.status}
-                    onChange={(e) =>
-                      updateOrderStatus(order._id, e.target.value)
-                    }
-                    className="w-full md:w-1/3 border rounded-md p-2 bg-white/95 dark:bg-slate-700/80 dark:border-slate-600 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-400 dark:focus:ring-orange-500"
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="confirmed">Confirmed</option>
-                    <option value="preparing">Preparing</option>
-                    <option value="ready">Ready</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
                 </div>
               </article>
             ))
