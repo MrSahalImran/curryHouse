@@ -565,7 +565,7 @@ export default function CartScreen() {
                   </TouchableOpacity>
                 </>
               )}
-                {step === 2 && (
+              {step === 2 && (
                 <>
                   <Text style={styles.modalTitle}>Add Extras / Notes</Text>
                   {/* Optional Extras */}

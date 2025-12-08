@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
 const API_URL = "http://localhost:5000/api";
@@ -40,6 +40,16 @@ function getInitials(name) {
     .toUpperCase();
 }
 
+function formatTimeAgo(d) {
+  if (!d) return "";
+  const sec = Math.floor((Date.now() - new Date(d).getTime()) / 1000);
+  if (sec < 5) return "just now";
+  if (sec < 60) return `${sec}s ago`;
+  if (sec < 3600) return `${Math.floor(sec / 60)}m ago`;
+  if (sec < 86400) return `${Math.floor(sec / 3600)}h ago`;
+  return `${Math.floor(sec / 86400)}d ago`;
+}
+
 export default function App() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -53,6 +63,8 @@ export default function App() {
       return false;
     }
   });
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const prevCountRef = useRef(0);
 
   useEffect(() => {
     if (dark) {
@@ -66,20 +78,32 @@ export default function App() {
 
   useEffect(() => {
     fetchOrders();
+
+    // Poll for new orders silently every 8 seconds
+    const interval = setInterval(() => {
+      fetchOrders({ silent: true });
+    }, 8000);
+    return () => clearInterval(interval);
   }, []);
 
-  const fetchOrders = async () => {
-    setLoading(true);
+  const fetchOrders = async (opts = { silent: false }) => {
+    const { silent } = opts;
+    if (!silent) {
+      setLoading(true);
+    }
     setError(null);
     try {
       const res = await axios.get(`${API_URL}/orders/admin/all`);
       const data = res?.data?.data || [];
       setOrders(data);
+      setLastUpdated(new Date());
+      // update previous count for next comparison
+      prevCountRef.current = data.length;
     } catch (err) {
       console.error(err);
-      setError(err?.message || "Failed to fetch orders");
+      if (!silent) setError(err?.message || "Failed to fetch orders");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -141,6 +165,15 @@ export default function App() {
             >
               ↻ Refresh
             </button>
+            <div className="text-xs text-slate-500 dark:text-slate-300 ml-2">
+              <span className="inline-flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-400 inline-block" />
+                <span>Live</span>
+                {lastUpdated ? (
+                  <span className="ml-2">· {formatTimeAgo(lastUpdated)}</span>
+                ) : null}
+              </span>
+            </div>
             <button
               onClick={() => setDark((d) => !d)}
               title="Toggle theme"
@@ -295,6 +328,57 @@ export default function App() {
                       </select>
                     </div>
                   </div>
+                </div>
+
+                {/* Order items list */}
+                <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                  {order.items && order.items.length > 0 ? (
+                    <div className="space-y-2">
+                      {order.items.map((it, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-start justify-between text-sm text-slate-700 dark:text-slate-200"
+                        >
+                          <div className="min-w-0">
+                            <div className="font-medium truncate">
+                              {it.name || it.menuItem?.name || "Item"}{" "}
+                              <span className="text-xs text-slate-500">
+                                x{it.quantity || 1}
+                              </span>
+                            </div>
+                            {it.extras && it.extras.length > 0 ? (
+                              <div className="text-xs text-slate-500 mt-1">
+                                Extras:{" "}
+                                {it.extras
+                                  .map((e) => (e.name ? e.name : e))
+                                  .join(", ")}
+                              </div>
+                            ) : null}
+                          </div>
+
+                          <div className="ml-4 font-medium">
+                            kr{" "}
+                            {(
+                              it.subtotal ??
+                              (it.price && it.quantity
+                                ? it.price * it.quantity
+                                : 0)
+                            ).toLocaleString()}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
+                      No items listed
+                    </div>
+                  )}
+
+                  {order.specialInstructions ? (
+                    <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                      Note: {order.specialInstructions}
+                    </div>
+                  ) : null}
                 </div>
               </article>
             ))

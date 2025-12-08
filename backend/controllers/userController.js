@@ -45,12 +45,10 @@ exports.addFavorite = async (req, res) => {
     });
   } catch (error) {
     console.error("Add favorite error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Server error while adding to favorites",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Server error while adding to favorites",
+    });
   }
 };
 
@@ -68,12 +66,10 @@ exports.removeFavorite = async (req, res) => {
     });
   } catch (error) {
     console.error("Remove favorite error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Server error while removing from favorites",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Server error while removing from favorites",
+    });
   }
 };
 
@@ -83,11 +79,9 @@ exports.getFavorites = async (req, res) => {
     res.json({ success: true, data: user.favorites });
   } catch (error) {
     console.error("Get favorites error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Server error while fetching favorites",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching favorites",
+    });
   }
 };
