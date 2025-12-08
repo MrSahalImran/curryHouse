@@ -2,8 +2,14 @@ const Order = require("../models/Order");
 
 exports.createOrder = async (req, res) => {
   try {
-    const { items, deliveryType, paymentMethod, specialInstructions, extras, extrasTotal } =
-      req.body;
+    const {
+      items,
+      deliveryType,
+      paymentMethod,
+      specialInstructions,
+      extras,
+      extrasTotal,
+    } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({
