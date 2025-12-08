@@ -47,8 +47,14 @@ export default function OrdersScreen() {
     return (
       <View style={styles.orderCard}>
         <View style={styles.orderHeader}>
-          <View>
-            <Text style={styles.orderNumber}>Order #{order.orderNumber}</Text>
+          <View style={styles.orderHeaderLeft}>
+            <Text
+              style={styles.orderNumber}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              Order #{order.orderNumber}
+            </Text>
             <Text style={styles.orderDate}>
               {new Date(order.createdAt).toLocaleDateString("no-NO", {
                 year: "numeric",
@@ -178,6 +184,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
+  orderHeaderLeft: {
+    flex: 1,
+    marginRight: 8,
+    minWidth: 0,
+  },
   orderNumber: {
     fontSize: 18,
     fontWeight: "bold",
@@ -194,6 +205,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
+    flexShrink: 0,
   },
   statusText: {
     fontSize: 12,
