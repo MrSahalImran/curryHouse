@@ -23,4 +23,15 @@ router.get("/:id", auth, ordersController.getOrderById);
 // @access  Private
 router.patch("/:id/cancel", auth, ordersController.cancelOrder);
 
+// Admin routes (temporarily without auth for testing)
+// @route   GET /api/orders/admin/all
+// @desc    Get all orders (admin)
+// @access  Public (should be admin-only in production)
+router.get("/admin/all", ordersController.getAllOrders);
+
+// @route   PATCH /api/orders/admin/:id/status
+// @desc    Update order status (admin)
+// @access  Public (should be admin-only in production)
+router.patch("/admin/:id/status", ordersController.updateOrderStatus);
+
 module.exports = router;

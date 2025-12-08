@@ -154,3 +154,46 @@ exports.cancelOrder = async (req, res) => {
       .json({ success: false, message: "Server error while cancelling order" });
   }
 };
+
+// Admin controllers
+exports.getAllOrders = async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate("user", "name email phone")
+      .populate("items.menuItem")
+      .sort({ createdAt: -1 });
+    res.json({ success: true, count: orders.length, data: orders });
+  } catch (error) {
+    console.error("Get all orders error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error while fetching orders" });
+  }
+};
+
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    order.status = status;
+    await order.save();
+
+    res.json({
+      success: true,
+      message: "Order status updated successfully",
+      data: order,
+    });
+  } catch (error) {
+    console.error("Update order status error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error while updating order" });
+  }
+};
