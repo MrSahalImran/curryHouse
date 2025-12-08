@@ -2,7 +2,7 @@ const Order = require("../models/Order");
 
 exports.createOrder = async (req, res) => {
   try {
-    const { items, deliveryType, paymentMethod, specialInstructions } =
+    const { items, deliveryType, paymentMethod, specialInstructions, extras, extrasTotal } =
       req.body;
 
     if (!items || items.length === 0) {
@@ -32,6 +32,8 @@ exports.createOrder = async (req, res) => {
       deliveryType: deliveryType || "delivery",
       paymentMethod: paymentMethod || "cash",
       specialInstructions: specialInstructions || "",
+      extras: Array.isArray(extras) ? extras : [],
+      extrasTotal: Number(extrasTotal) || 0,
     });
 
     await order.save();

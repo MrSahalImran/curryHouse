@@ -348,9 +348,12 @@ export default function App() {
                             </div>
                             {it.extras && it.extras.length > 0 ? (
                               <div className="text-xs text-slate-500 mt-1">
-                                Extras:{" "}
+                                Extras: {" "}
                                 {it.extras
-                                  .map((e) => (e.name ? e.name : e))
+                                  .map((e) => {
+                                    const label = e?.name || e?.id || e;
+                                    return e?.quantity ? `${label} x${e.quantity}` : label;
+                                  })
                                   .join(", ")}
                               </div>
                             ) : null}
@@ -373,6 +376,27 @@ export default function App() {
                       No items listed
                     </div>
                   )}
+
+                  {/* Order-level extras (if any) */}
+                  {order.extras && order.extras.length > 0 ? (
+                    <div className="mt-2 text-sm text-slate-700 dark:text-slate-200">
+                      <div className="font-medium">Extras</div>
+                      <div className="text-xs text-slate-500 mt-1">
+                        {order.extras.map((ex, i) => (
+                          <div key={i} className="flex justify-between">
+                            <div>
+                              {ex.name || ex.id}
+                              {ex.quantity ? <span className="text-xs text-slate-500"> x{ex.quantity}</span> : null}
+                            </div>
+                            <div>kr {(ex.subtotal ?? (ex.price && ex.quantity ? ex.price * ex.quantity : ex.price || 0)).toLocaleString()}</div>
+                          </div>
+                        ))}
+                      </div>
+                      {order.extrasTotal ? (
+                        <div className="mt-1 text-xs text-slate-600 dark:text-slate-400">Extras total: kr {Number(order.extrasTotal).toLocaleString()}</div>
+                      ) : null}
+                    </div>
+                  ) : null}
 
                   {order.specialInstructions ? (
                     <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">

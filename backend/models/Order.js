@@ -14,6 +14,16 @@ const orderItemSchema = new mongoose.Schema({
     min: 1,
   },
   subtotal: Number,
+  // extras per item (optional) - keep flexible shape
+  extras: [
+    {
+      id: String,
+      name: String,
+      price: Number,
+      quantity: Number,
+      subtotal: Number,
+    },
+  ],
 });
 
 const orderSchema = new mongoose.Schema(
@@ -56,6 +66,20 @@ const orderSchema = new mongoose.Schema(
     specialInstructions: {
       type: String,
       default: "",
+    },
+    // Order-level extras (picked during checkout)
+    extras: [
+      {
+        id: String,
+        name: String,
+        price: Number,
+        quantity: Number,
+        subtotal: Number,
+      },
+    ],
+    extrasTotal: {
+      type: Number,
+      default: 0,
     },
     estimatedDeliveryTime: {
       type: Number, // in minutes
