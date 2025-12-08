@@ -2,7 +2,7 @@
 // Prefer EXPO_PUBLIC_API_URL so you can switch between local/remote backends without editing code.
 // For local dev on emulator use: http://10.0.2.2:5000/api
 // For local dev on device use: http://<your-LAN-IP>:5000/api
-export const API_URL = "https://curryhouse-dw7s.onrender.com/api";
+export const API_URL = "http://192.168.29.33:5000/api";
 
 const config = {
   API_URL,

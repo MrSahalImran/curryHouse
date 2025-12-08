@@ -3,7 +3,8 @@ const { validationResult } = require("express-validator");
 const User = require("../models/User");
 
 const generateToken = (userId) => {
-  return jwt.sign({ userId }, "sldkfjasldkfjlaskdjflkas", { expiresIn: "30d" });
+  const secret = process.env.JWT_SECRET || "sldkfjasldkfjlaskdjflkas";
+  return jwt.sign({ userId }, secret, { expiresIn: "30d" });
 };
 
 exports.register = async (req, res) => {
