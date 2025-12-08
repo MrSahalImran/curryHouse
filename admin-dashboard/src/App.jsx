@@ -66,6 +66,10 @@ export default function App() {
   const [lastUpdated, setLastUpdated] = useState(null);
   const prevCountRef = useRef(0);
 
+  // Undo state
+  const undoTimerRef = useRef(null);
+  const [pendingUndo, setPendingUndo] = useState(null);
+
   useEffect(() => {
     if (dark) {
       document.documentElement.classList.add("dark");
@@ -88,16 +92,13 @@ export default function App() {
 
   const fetchOrders = async (opts = { silent: false }) => {
     const { silent } = opts;
-    if (!silent) {
-      setLoading(true);
-    }
+    if (!silent) setLoading(true);
     setError(null);
     try {
       const res = await axios.get(`${API_URL}/orders/admin/all`);
       const data = res?.data?.data || [];
       setOrders(data);
       setLastUpdated(new Date());
-      // update previous count for next comparison
       prevCountRef.current = data.length;
     } catch (err) {
       console.error(err);
@@ -109,14 +110,78 @@ export default function App() {
 
   const updateOrderStatus = async (orderId, status) => {
     try {
-      await axios.patch(`${API_URL}/orders/admin/${orderId}/status`, {
-        status,
-      });
-      fetchOrders();
+      const res = await axios.patch(
+        `${API_URL}/orders/admin/${orderId}/status`,
+        {
+          status,
+        }
+      );
+      return { success: true, data: res?.data };
     } catch (err) {
       console.error("Failed to update status", err);
+      return { success: false, error: err };
+    }
+  };
+
+  // Optimistic status change with undo
+  const statusChangeWithUndo = async (order, newStatus) => {
+    if (!order || order.status === newStatus) return;
+    const prevStatus = order.status;
+
+    // Optimistically update UI
+    setOrders((list) =>
+      list.map((o) => (o._id === order._id ? { ...o, status: newStatus } : o))
+    );
+
+    // Clear existing undo timer
+    if (undoTimerRef.current) {
+      clearTimeout(undoTimerRef.current);
+      undoTimerRef.current = null;
+    }
+
+    setPendingUndo({ orderId: order._id, prevStatus, newStatus });
+
+    // Auto-clear undo after 8s
+    undoTimerRef.current = setTimeout(() => {
+      setPendingUndo(null);
+      undoTimerRef.current = null;
+    }, 8000);
+
+    const res = await updateOrderStatus(order._id, newStatus);
+    if (!res.success) {
+      // revert
+      setOrders((list) =>
+        list.map((o) =>
+          o._id === order._id ? { ...o, status: prevStatus } : o
+        )
+      );
+      setPendingUndo(null);
+      if (undoTimerRef.current) {
+        clearTimeout(undoTimerRef.current);
+        undoTimerRef.current = null;
+      }
       setError("Failed to update order status");
     }
+  };
+
+  const undoStatusChange = async () => {
+    if (!pendingUndo) return;
+    const { orderId, prevStatus } = pendingUndo;
+
+    // Optimistically revert UI
+    setOrders((list) =>
+      list.map((o) => (o._id === orderId ? { ...o, status: prevStatus } : o))
+    );
+
+    // clear timer + pending
+    if (undoTimerRef.current) {
+      clearTimeout(undoTimerRef.current);
+      undoTimerRef.current = null;
+    }
+    setPendingUndo(null);
+
+    const res = await updateOrderStatus(orderId, prevStatus);
+    if (!res.success) setError("Failed to revert order status");
   };
 
   const statusFilters = [
@@ -160,7 +225,7 @@ export default function App() {
               className="px-3 py-2 border rounded-md w-64 focus:outline-none"
             />
             <button
-              onClick={fetchOrders}
+              onClick={() => fetchOrders()}
               className="px-3 py-2 bg-slate-800 text-white rounded-md"
             >
               ↻ Refresh
@@ -253,7 +318,7 @@ export default function App() {
             <div className="text-center">
               <div className="text-red-500 mb-2">Error: {error}</div>
               <button
-                onClick={fetchOrders}
+                onClick={() => fetchOrders()}
                 className="px-4 py-2 bg-orange-500 text-white rounded-md"
               >
                 Retry
@@ -316,7 +381,7 @@ export default function App() {
                       <select
                         value={order.status}
                         onChange={(e) =>
-                          updateOrderStatus(order._id, e.target.value)
+                          statusChangeWithUndo(order, e.target.value)
                         }
                         className="w-full border rounded-md p-2 bg-white/95 dark:bg-slate-700/80 dark:border-slate-600 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-400 dark:focus:ring-orange-500 text-sm"
                       >
@@ -426,6 +491,22 @@ export default function App() {
             ))
           )}
         </main>
+
+        {/* Undo toast */}
+        {pendingUndo ? (
+          <div className="fixed right-6 bottom-6 bg-white dark:bg-slate-800 border rounded-lg shadow-md p-3 flex items-center gap-4">
+            <div className="text-sm">
+              Status changed to{" "}
+              <strong>{capitalizeStatus(pendingUndo.newStatus)}</strong>
+            </div>
+            <button
+              onClick={undoStatusChange}
+              className="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-md text-sm font-semibold"
+            >
+              Undo
+            </button>
+          </div>
+        ) : null}
       </div>
     </div>
   );
