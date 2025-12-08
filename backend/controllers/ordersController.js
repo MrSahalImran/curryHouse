@@ -2,14 +2,7 @@ const Order = require("../models/Order");
 
 exports.createOrder = async (req, res) => {
   try {
-    const {
-      items,
-      addressId,
-      deliveryAddress,
-      deliveryType,
-      paymentMethod,
-      specialInstructions,
-    } = req.body;
+    const { items, deliveryType, paymentMethod, specialInstructions } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({
@@ -22,37 +15,7 @@ exports.createOrder = async (req, res) => {
       req.body.totalAmount ||
       items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-    let resolvedAddress = null;
-    if (addressId) {
-      const user = req.user;
-      const addr = user.deliveryAddresses?.find(
-        (a) => a._id.toString() === addressId
-      );
-      if (addr) {
-        resolvedAddress = {
-          street: addr.street,
-          city: addr.city,
-          postalCode: addr.postalCode,
-          country: addr.country || "Norway",
-        };
-      }
-    }
-    if (!resolvedAddress && deliveryAddress) {
-      resolvedAddress = deliveryAddress;
-    }
-    if (!resolvedAddress && req.user.deliveryAddresses?.length) {
-      const def = req.user.deliveryAddresses.find((a) => a.isDefault);
-      const first = def || req.user.deliveryAddresses[0];
-      resolvedAddress = {
-        street: first.street,
-        city: first.city,
-        postalCode: first.postalCode,
-        country: first.country || "Norway",
-      };
-    }
-    if (!resolvedAddress) {
-      resolvedAddress = req.user.address;
-    }
+    // Delivery address handling removed — orders no longer store deliveryAddress
 
     // Generate unique order number
     const orderNumber = `ORD-${Date.now()}-${Math.random()
@@ -65,7 +28,6 @@ exports.createOrder = async (req, res) => {
       orderNumber,
       items,
       totalAmount,
-      deliveryAddress: resolvedAddress,
       deliveryType: deliveryType || "delivery",
       paymentMethod: paymentMethod || "cash",
       specialInstructions: specialInstructions || "",

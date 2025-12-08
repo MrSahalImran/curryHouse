@@ -10,30 +10,7 @@ const userController = require("../controllers/userController");
 router.put("/profile", auth, userController.updateProfile);
 
 // -------------------- DELIVERY ADDRESSES --------------------
-// @route   GET /api/user/addresses
-// @desc    Get user's delivery addresses
-// @access  Private
-router.get("/addresses", auth, userController.getAddresses);
-
-// @route   POST /api/user/addresses
-// @desc    Add a new delivery address
-// @access  Private
-router.post("/addresses", auth, userController.addAddress);
-
-// @route   PUT /api/user/addresses/:id
-// @desc    Update a delivery address
-// @access  Private
-router.put("/addresses/:id", auth, userController.updateAddress);
-
-// @route   PATCH /api/user/addresses/:id/default
-// @desc    Set a delivery address as default
-// @access  Private
-router.patch("/addresses/:id/default", auth, userController.setDefaultAddress);
-
-// @route   DELETE /api/user/addresses/:id
-// @desc    Delete a delivery address
-// @access  Private
-router.delete("/addresses/:id", auth, userController.deleteAddress);
+// Delivery address endpoints removed
 
 // -------------------- FAVORITES --------------------
 // @route   POST /api/user/favorites/:menuItemId

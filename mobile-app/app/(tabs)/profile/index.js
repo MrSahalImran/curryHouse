@@ -77,20 +77,7 @@ export default function ProfileScreen() {
           <Ionicons name="chevron-forward" size={24} color={COLORS.textMuted} />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={() => requireAuth("/profile/delivery")}
-        >
-          <View style={styles.menuItemLeft}>
-            <Ionicons
-              name="location-outline"
-              size={24}
-              color={COLORS.primary}
-            />
-            <Text style={styles.menuItemText}>Delivery Addresses</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={24} color={COLORS.textMuted} />
-        </TouchableOpacity>
+        {/* Delivery Addresses removed */}
 
         <TouchableOpacity
           style={styles.menuItem}

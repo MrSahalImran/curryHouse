@@ -33,12 +33,6 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    deliveryAddress: {
-      street: { type: String, required: true },
-      city: { type: String, required: true },
-      postalCode: { type: String, required: true },
-      country: { type: String, default: "Norway" },
-    },
     deliveryType: {
       type: String,
       enum: ["delivery", "pickup"],

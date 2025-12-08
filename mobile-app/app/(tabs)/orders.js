@@ -25,12 +25,6 @@ const STATUS_CONFIG = {
     label: "Preparing",
   },
   ready: { icon: "checkmark-done", color: COLORS.success, label: "Ready" },
-  on_the_way: { icon: "bicycle", color: COLORS.primary, label: "On the way" },
-  delivered: {
-    icon: "checkmark-circle",
-    color: COLORS.success,
-    label: "Delivered",
-  },
   cancelled: { icon: "close-circle", color: COLORS.error, label: "Cancelled" },
 };
 

@@ -15,7 +15,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../../config/config";
 import useCartStore from "../../store/cartStore";
 import useOrderStore from "../../store/orderStore";
-import useAddressStore from "../../store/addressStore";
 import useAuthStore from "../../store/authStore";
 import AuthPromptModal from "../components/AuthPromptModal";
 import { useState, useEffect } from "react";
@@ -376,7 +375,6 @@ export default function CartScreen() {
   } = useCartStore();
   const { createOrder } = useOrderStore();
   const { user } = useAuthStore();
-  const { addresses, fetchAddresses } = useAddressStore();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [step, setStep] = useState(1);
@@ -393,22 +391,7 @@ export default function CartScreen() {
     0
   );
 
-  useEffect(() => {
-    if (modalVisible) fetchAddresses();
-  }, [modalVisible]);
-
-  // Fetch addresses initially
-  useEffect(() => {
-    fetchAddresses();
-  }, []);
-
-  // Preselect default address or first address when list changes
-  useEffect(() => {
-    if (addresses && addresses.length > 0) {
-      const defaultAddr = addresses.find((a) => a.isDefault) || addresses[0];
-      setSelectedAddress((prev) => prev || defaultAddr?._id);
-    }
-  }, [addresses]);
+  // Address feature removed: no selection required
 
   const handleCheckout = () => {
     if (items.length === 0) {
@@ -428,10 +411,7 @@ export default function CartScreen() {
       setAuthPromptVisible(true);
       return;
     }
-    if (!selectedAddress) {
-      Alert.alert("Select Address", "Please select a delivery address.");
-      return;
-    }
+    // No address required; proceed
     const extrasPicked = Object.entries(extraSelections)
       .filter(([_, qty]) => qty > 0)
       .map(([id, qty]) => {
@@ -456,7 +436,7 @@ export default function CartScreen() {
       totalAmount: totalPrice + extrasTotalPayload,
       deliveryType: "delivery",
       paymentMethod: "cash",
-      addressId: selectedAddress,
+      // address selection removed
       specialInstructions: extraNotes,
       extras: extrasPicked,
       extrasTotal: extrasTotalPayload,
@@ -527,39 +507,9 @@ export default function CartScreen() {
     );
   }
 
-  const selectedAddrObj = addresses.find((a) => a._id === selectedAddress);
-  const selectedAddrLine = selectedAddrObj
-    ? `${selectedAddrObj.street}, ${selectedAddrObj.city} ${selectedAddrObj.postalCode}`
-    : "No address selected";
-
   return (
     <View style={styles.container}>
-      {/* Address summary */}
-      <View style={styles.addressCard}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.addressCardTitle}>Deliver to</Text>
-          <Text
-            style={
-              selectedAddrObj
-                ? styles.addressCardText
-                : styles.addressCardTextMuted
-            }
-          >
-            {selectedAddrLine}
-          </Text>
-          {selectedAddrObj?.isDefault && (
-            <Text style={styles.defaultBadge}>Default</Text>
-          )}
-        </View>
-        <TouchableOpacity
-          onPress={() => {
-            setModalVisible(true);
-            setStep(3);
-          }}
-        >
-          <Text style={styles.changeText}>Change</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Delivery addresses removed — orders do not store delivery addresses */}
       <FlatList
         data={items}
         renderItem={renderCartItem}
@@ -615,7 +565,7 @@ export default function CartScreen() {
                   </TouchableOpacity>
                 </>
               )}
-              {step === 2 && (
+                {step === 2 && (
                 <>
                   <Text style={styles.modalTitle}>Add Extras / Notes</Text>
                   {/* Optional Extras */}
@@ -720,58 +670,12 @@ export default function CartScreen() {
                     style={styles.nextBtn}
                     onPress={() => setStep(3)}
                   >
-                    <Text style={styles.nextBtnText}>Next: Select Address</Text>
+                    <Text style={styles.nextBtnText}>Next: Review</Text>
                   </TouchableOpacity>
                 </>
               )}
               {step === 3 && (
                 <>
-                  <Text style={styles.modalTitle}>Select Delivery Address</Text>
-                  {addresses.length === 0 ? (
-                    <Text style={styles.noAddressText}>
-                      No addresses found. Add one in Profile.
-                    </Text>
-                  ) : (
-                    <>
-                      {addresses.map((addr) => (
-                        <TouchableOpacity
-                          key={addr._id}
-                          style={[
-                            styles.addressOption,
-                            selectedAddress === addr._id &&
-                              styles.addressSelected,
-                          ]}
-                          onPress={() => setSelectedAddress(addr._id)}
-                        >
-                          <View style={{ flex: 1 }}>
-                            <Text style={styles.addressText}>
-                              {addr.street}, {addr.city} {addr.postalCode}
-                            </Text>
-                            {addr.isDefault && (
-                              <Text style={styles.defaultPill}>Default</Text>
-                            )}
-                          </View>
-                          {selectedAddress === addr._id && (
-                            <Ionicons
-                              name="checkmark-circle"
-                              size={22}
-                              color={COLORS.primary}
-                            />
-                          )}
-                        </TouchableOpacity>
-                      ))}
-                      <TouchableOpacity
-                        onPress={() => {
-                          setModalVisible(false);
-                          router.push("/profile/delivery");
-                        }}
-                      >
-                        <Text style={styles.manageAddressesLink}>
-                          Manage addresses
-                        </Text>
-                      </TouchableOpacity>
-                    </>
-                  )}
                   {/* Final totals before placing order */}
                   <View style={{ marginTop: 12 }}>
                     <View style={styles.modalItemRow}>

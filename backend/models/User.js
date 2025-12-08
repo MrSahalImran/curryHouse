@@ -36,18 +36,7 @@ const userSchema = new mongoose.Schema(
       postalCode: { type: String, default: "" },
       country: { type: String, default: "Norway" },
     },
-    // Multiple delivery addresses (preferred over legacy `address` field)
-    deliveryAddresses: [
-      {
-        label: { type: String, default: "Home" },
-        street: { type: String, required: true },
-        city: { type: String, required: true },
-        postalCode: { type: String, required: true },
-        country: { type: String, default: "Norway" },
-        isDefault: { type: Boolean, default: false },
-        createdAt: { type: Date, default: Date.now },
-      },
-    ],
+    // legacy single address field (kept) — per-order delivery addresses removed
     avatar: {
       type: String,
       default: "https://via.placeholder.com/150",
