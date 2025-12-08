@@ -7,6 +7,7 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
+      "image": "./assets/splashscreen_logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#FF6B35"
     },
@@ -25,6 +26,12 @@
       "bundler": "metro"
     },
     "plugins": ["expo-router", "expo-asset"],
-    "scheme": "curryhousejar"
+    "scheme": "curryhousejar",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "cae9cfe0-d5c3-428e-b39b-8b8bcc5bdd8c"
+      }
+    }
   }
 }
