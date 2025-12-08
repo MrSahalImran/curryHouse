@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* small custom utilities for layout */
+.app-container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
+}
+.card {
+  @apply bg-white/90 border border-slate-200/20 rounded-lg shadow-md p-4 backdrop-blur-sm;
+  @apply dark:bg-slate-800/70 dark:border-slate-700/30 dark:text-slate-100;
+}
+.stat-card {
+  @apply bg-gradient-to-r from-white/10 to-white/5 border-l-4 border-orange-400 rounded-lg p-4;
+}
+.scroll-x {
+  @apply overflow-x-auto -mx-4 px-4;
+}
+
+/* page background and subtle vignette */
+.app-bg {
+  background-image: linear-gradient(180deg, rgba(248,250,252,1) 0%, rgba(241,245,249,1) 50%, rgba(255,255,255,1) 100%);
+}
+
+/* dark variant for background */
+.dark .app-bg {
+  background-image: linear-gradient(180deg, rgba(15,23,42,1) 0%, rgba(17,24,39,1) 50%, rgba(7,10,20,1) 100%);
+}
+
+/* slightly darker header for contrast */
+.site-header {
+  @apply bg-white/60 backdrop-blur-sm rounded-md p-3;
+  @apply dark:bg-slate-900/60 dark:text-slate-100;
+}
+
