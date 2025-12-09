@@ -8,6 +8,7 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState(0);
   const [category, setCategory] = useState("Biryani");
+  const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -21,6 +22,21 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
       setCategory(initial.category || "Biryani");
       setTags((initial.tags || []).join(", "));
     }
+    // fetch categories for select
+    const fetchCategories = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/menu/categories`);
+        const data = res.data?.data || [];
+        // remove "All" if present
+        const filtered = data.filter((c) => c !== "All");
+        setCategories(filtered);
+        if (!initial) setCategory(filtered[0] || "Biryani");
+      } catch (e) {
+        console.error("Failed to load categories", e);
+      }
+    };
+
+    fetchCategories();
   }, [initial]);
 
   const handleFileChange = (e) => {
@@ -147,14 +163,20 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
               onChange={(e) => setCategory(e.target.value)}
               className="mt-1 w-full p-2 border rounded-md"
             >
-              <option>Biryani</option>
-              <option>Kebab</option>
-              <option>Drinks</option>
-              <option>Naan</option>
-              <option>Curry</option>
-              <option>Appetizers</option>
-              <option>Desserts</option>
-              <option>Combo Meals</option>
+              {categories.length ? (
+                categories.map((c) => <option key={c}>{c}</option>)
+              ) : (
+                <>
+                  <option>Biryani</option>
+                  <option>Kebab</option>
+                  <option>Drinks</option>
+                  <option>Naan</option>
+                  <option>Curry</option>
+                  <option>Appetizers</option>
+                  <option>Desserts</option>
+                  <option>Combo Meals</option>
+                </>
+              )}
             </select>
           </div>
           <div>

@@ -12,6 +12,16 @@ router.get("/", menuController.getMenu);
 // @access  Public
 router.get("/categories", menuController.getCategories);
 
+// @route   POST /api/menu/categories
+// @desc    Create a new category (admin)
+// @access  Public for now
+router.post("/categories", menuController.createCategory);
+
+// @route   DELETE /api/menu/categories/:name
+// @desc    Delete a category by name (admin)
+// @access  Public for now
+router.delete("/categories/:name", menuController.deleteCategory);
+
 // @route   GET /api/menu/popular/items
 // @desc    Get popular menu items
 // @access  Public

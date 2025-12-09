@@ -1,4 +1,5 @@
 const MenuItem = require("../models/MenuItem");
+const Category = require("../models/Category");
 const fs = require("fs");
 const path = require("path");
 
@@ -66,14 +67,80 @@ exports.getMenu = async (req, res) => {
 
 exports.getCategories = async (req, res) => {
   try {
-    const categories = await MenuItem.distinct("category");
-    res.json({ success: true, data: ["All", ...categories] });
+    const itemCategories = await MenuItem.distinct("category");
+    const stored = await Category.find({}, "name").lean();
+    const storedNames = stored.map((s) => s.name);
+    // merge and dedupe
+    const merged = Array.from(
+      new Set(["All", ...storedNames, ...itemCategories])
+    );
+    res.json({ success: true, data: merged });
   } catch (error) {
     console.error("Get categories error:", error);
     res.status(500).json({
       success: false,
       message: "Server error while fetching categories",
     });
+  }
+};
+
+// create a new category (admin)
+exports.createCategory = async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name || !name.trim())
+      return res
+        .status(400)
+        .json({ success: false, message: "Category name is required" });
+    const normalized = name.trim();
+    // check existing in Category collection
+    const exists = await Category.findOne({ name: normalized });
+    if (exists)
+      return res
+        .status(409)
+        .json({ success: false, message: "Category already exists" });
+    // create
+    const cat = await Category.create({ name: normalized });
+    return res.status(201).json({ success: true, data: cat });
+  } catch (err) {
+    console.error("createCategory error", err);
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to create category",
+        error: err.message,
+      });
+  }
+};
+
+// delete category by name
+exports.deleteCategory = async (req, res) => {
+  try {
+    const { name } = req.params;
+    if (!name)
+      return res
+        .status(400)
+        .json({ success: false, message: "Category name required" });
+    const removed = await Category.findOneAndDelete({ name });
+    if (!removed)
+      return res
+        .status(404)
+        .json({ success: false, message: "Category not found" });
+    return res.json({
+      success: true,
+      message: "Category deleted",
+      data: removed,
+    });
+  } catch (err) {
+    console.error("deleteCategory error", err);
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to delete category",
+        error: err.message,
+      });
   }
 };
 
@@ -192,12 +259,10 @@ exports.updateItem = async (req, res) => {
     res.json({ success: true, data: updated });
   } catch (error) {
     console.error("Update menu item error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Server error while updating menu item",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Server error while updating menu item",
+    });
   }
 };
 
@@ -226,11 +291,9 @@ exports.deleteItem = async (req, res) => {
     res.json({ success: true, message: "Menu item deleted" });
   } catch (error) {
     console.error("Delete menu item error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Server error while deleting menu item",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Server error while deleting menu item",
+    });
   }
 };

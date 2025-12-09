@@ -20,16 +20,6 @@ const menuItemSchema = new mongoose.Schema(
     category: {
       type: String,
       required: [true, "Category is required"],
-      enum: [
-        "Biryani",
-        "Kebab",
-        "Drinks",
-        "Naan",
-        "Curry",
-        "Appetizers",
-        "Desserts",
-        "Combo Meals",
-      ],
     },
     image: {
       type: String,
