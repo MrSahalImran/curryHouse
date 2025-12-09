@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const API_URL = "https://curry-house-eight.vercel.app/api";
+const API_URL = "https://curryhouse-dw7s.onrender.com/api";
 
 export default function ManageMenu({ onEdit }) {
   const [items, setItems] = useState([]);

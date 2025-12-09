@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const API_URL = "https://curry-house-eight.vercel.app/api";
+const API_URL = "https://curryhouse-dw7s.onrender.com/api;
 
 export default function AddMenuItem({ onBack, initial = null, onSaved }) {
   const [name, setName] = useState("");
