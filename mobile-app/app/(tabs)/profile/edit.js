@@ -32,7 +32,7 @@ export default function EditProfileScreen() {
     setError("");
     setLoading(true);
     try {
-      const res = await userAPI.updateProfile({ name, phone, avatar });
+      const res = await userAPI.updateProfile({ name, phone });
       if (res.success) {
         updateUser(res.user);
         Alert.alert("Profile updated!", "Your profile has been updated.", [
@@ -79,14 +79,7 @@ export default function EditProfileScreen() {
         keyboardType="phone-pad"
         maxLength={15}
       />
-      <Text style={styles.label}>Avatar URL</Text>
-      <TextInput
-        style={styles.input}
-        value={avatar}
-        onChangeText={setAvatar}
-        placeholder="Avatar Image URL"
-        autoCapitalize="none"
-      />
+      {/* Avatar URL editing removed */}
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <View style={styles.actions}>
         <TouchableOpacity
