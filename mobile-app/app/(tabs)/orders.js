@@ -92,8 +92,21 @@ export default function OrdersScreen() {
                   <View style={styles.extrasRow}>
                     {item.extras.map((e, ei) => (
                       <View key={ei} style={styles.extraPill}>
-                        <Text style={styles.extraPillText} numberOfLines={1} ellipsizeMode="tail">{e.name || e.id || e}{e.quantity ? ` x${e.quantity}` : ''}</Text>
-                        <Text style={styles.extraPillPrice}>kr { (e.subtotal ?? (e.price && e.quantity ? e.price*e.quantity : e.price || 0)) }</Text>
+                        <Text
+                          style={styles.extraPillText}
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
+                        >
+                          {e.name || e.id || e}
+                          {e.quantity ? ` x${e.quantity}` : ""}
+                        </Text>
+                        <Text style={styles.extraPillPrice}>
+                          kr{" "}
+                          {e.subtotal ??
+                            (e.price && e.quantity
+                              ? e.price * e.quantity
+                              : e.price || 0)}
+                        </Text>
                       </View>
                     ))}
                   </View>
@@ -110,8 +123,17 @@ export default function OrdersScreen() {
               <View style={styles.extrasRow}>
                 {order.extras.map((ex, i) => (
                   <View key={i} style={styles.extraPillFull}>
-                    <Text style={styles.extraPillText}>{ex.name || ex.id}{ex.quantity ? ` x${ex.quantity}` : ''}</Text>
-                    <Text style={styles.extraPillPrice}>kr { (ex.subtotal ?? (ex.price && ex.quantity ? ex.price*ex.quantity : ex.price || 0)) }</Text>
+                    <Text style={styles.extraPillText}>
+                      {ex.name || ex.id}
+                      {ex.quantity ? ` x${ex.quantity}` : ""}
+                    </Text>
+                    <Text style={styles.extraPillPrice}>
+                      kr{" "}
+                      {ex.subtotal ??
+                        (ex.price && ex.quantity
+                          ? ex.price * ex.quantity
+                          : ex.price || 0)}
+                    </Text>
                   </View>
                 ))}
               </View>
