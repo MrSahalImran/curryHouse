@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Modal,
+  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../../config/config";
@@ -54,11 +56,21 @@ export default function MenuScreen() {
       Array.isArray(favorites) && favorites.some((fav) => fav._id === item._id);
 
     return (
-      <View style={styles.menuItem}>
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => setSelected(item)}
+        style={styles.menuItem}
+      >
         <Image source={{ uri: item.image }} style={styles.itemImage} />
         <View style={styles.itemDetails}>
           <View style={styles.itemHeader}>
-            <Text style={styles.itemName}>{item.name}</Text>
+            <Text
+              style={styles.itemName}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {item.name}
+            </Text>
             <TouchableOpacity
               style={styles.favoriteBtn}
               onPress={() =>
@@ -110,9 +122,14 @@ export default function MenuScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
+
+  // modal selection state
+  const [selected, setSelected] = useState(null);
+
+  const closeModal = () => setSelected(null);
 
   return (
     <View style={styles.container}>
@@ -175,6 +192,63 @@ export default function MenuScreen() {
           </View>
         }
       />
+
+      {/* Item detail modal */}
+      <Modal visible={!!selected} animationType="slide" transparent={true}>
+        <Pressable style={styles.modalOverlay} onPress={closeModal} />
+        {selected && (
+          <View style={styles.modalContent}>
+            <Image source={{ uri: selected.image }} style={styles.modalImage} />
+            <View style={styles.modalBody}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>{selected.name}</Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    const isFav =
+                      Array.isArray(favorites) &&
+                      favorites.some((f) => f._id === selected._id);
+                    isFav
+                      ? removeFavorite(selected._id)
+                      : addFavorite(selected._id);
+                  }}
+                >
+                  <Ionicons
+                    name={
+                      Array.isArray(favorites) &&
+                      favorites.some((f) => f._id === selected._id)
+                        ? "heart"
+                        : "heart-outline"
+                    }
+                    size={24}
+                    color={COLORS.error}
+                  />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.modalDesc}>{selected.description}</Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginTop: 12,
+                }}
+              >
+                <Text style={styles.modalPrice}>kr {selected.price}</Text>
+                <TouchableOpacity
+                  style={styles.addToCartButton}
+                  onPress={() => {
+                    addItem(selected);
+                    closeModal();
+                  }}
+                >
+                  <Ionicons name="add" size={18} color={COLORS.white} />
+                  <Text style={styles.addToCartText}>Add</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
+      </Modal>
     </View>
   );
 }
@@ -280,12 +354,14 @@ const styles = StyleSheet.create({
   favoriteBtn: {
     marginLeft: 8,
     padding: 4,
+    flexShrink: 0,
   },
   itemName: {
     fontSize: 16,
     fontWeight: "bold",
     color: COLORS.text,
     marginBottom: 4,
+    flexShrink: 1,
   },
   itemDescription: {
     fontSize: 12,
@@ -349,6 +425,48 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 10,
     fontWeight: "bold",
+  },
+  /* Modal styles */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    position: "absolute",
+    left: 20,
+    right: 20,
+    top: "15%",
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    overflow: "hidden",
+    elevation: 10,
+  },
+  modalImage: {
+    width: "100%",
+    height: 180,
+  },
+  modalBody: {
+    padding: 16,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    flex: 1,
+    marginRight: 8,
+  },
+  modalDesc: {
+    marginTop: 8,
+    color: COLORS.textMuted,
+  },
+  modalPrice: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: COLORS.primary,
   },
   emptyContainer: {
     flex: 1,
