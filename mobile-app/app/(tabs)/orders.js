@@ -86,22 +86,42 @@ export default function OrdersScreen() {
           {order.items.map((item, index) => (
             <View key={index} style={styles.orderItem}>
               <Text style={styles.itemQuantity}>{item.quantity}x</Text>
-              <Text style={styles.itemName}>{item.name}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.itemName}>{item.name}</Text>
+                {item.extras && item.extras.length > 0 ? (
+                  <View style={styles.extrasRow}>
+                    {item.extras.map((e, ei) => (
+                      <View key={ei} style={styles.extraPill}>
+                        <Text style={styles.extraPillText} numberOfLines={1} ellipsizeMode="tail">{e.name || e.id || e}{e.quantity ? ` x${e.quantity}` : ''}</Text>
+                        <Text style={styles.extraPillPrice}>kr { (e.subtotal ?? (e.price && e.quantity ? e.price*e.quantity : e.price || 0)) }</Text>
+                      </View>
+                    ))}
+                  </View>
+                ) : null}
+              </View>
               <Text style={styles.itemPrice}>kr {item.subtotal}</Text>
             </View>
           ))}
+
+          {/* Order-level extras (picked during checkout) */}
+          {order.extras && order.extras.length > 0 ? (
+            <View style={styles.orderExtras}>
+              <Text style={styles.sectionHeading}>Extras</Text>
+              <View style={styles.extrasRow}>
+                {order.extras.map((ex, i) => (
+                  <View key={i} style={styles.extraPillFull}>
+                    <Text style={styles.extraPillText}>{ex.name || ex.id}{ex.quantity ? ` x${ex.quantity}` : ''}</Text>
+                    <Text style={styles.extraPillPrice}>kr { (ex.subtotal ?? (ex.price && ex.quantity ? ex.price*ex.quantity : ex.price || 0)) }</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          ) : null}
         </View>
 
         <View style={styles.orderFooter}>
           <View style={styles.deliveryInfo}>
-            <Ionicons
-              name={order.deliveryType === "delivery" ? "bicycle" : "bag-check"}
-              size={16}
-              color={COLORS.textLight}
-            />
-            <Text style={styles.deliveryText}>
-              {order.deliveryType === "delivery" ? "Delivery" : "Pickup"}
-            </Text>
+            <Text style={styles.deliveryText}>Pickup</Text>
           </View>
           <View style={styles.totalContainer}>
             <Text style={styles.totalLabel}>Total:</Text>
@@ -294,5 +314,56 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontWeight: "700",
     fontSize: 16,
+  },
+  // Extras styling
+  extrasRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 6,
+  },
+  extraPill: {
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginRight: 8,
+    marginTop: 6,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  extraPillFull: {
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    marginRight: 8,
+    marginTop: 6,
+    minWidth: 120,
+  },
+  extraPillText: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    marginRight: 6,
+  },
+  extraPillPrice: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    fontWeight: "600",
+  },
+  orderExtras: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  sectionHeading: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: COLORS.text,
+    marginBottom: 6,
   },
 });

@@ -434,7 +434,8 @@ export default function CartScreen() {
         subtotal: item.price * item.quantity,
       })),
       totalAmount: totalPrice + extrasTotalPayload,
-      deliveryType: "delivery",
+      // Order type is always pickup
+      deliveryType: "pickup",
       paymentMethod: "cash",
       // address selection removed
       specialInstructions: extraNotes,
