@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import AddMenuItem from "./AddMenuItem";
+import ManageMenu from "./ManageMenu";
 import axios from "axios";
 
 const API_URL = "https://curryhouse-dw7s.onrender.com/api";
@@ -67,6 +68,7 @@ export default function App() {
   const [lastUpdated, setLastUpdated] = useState(null);
   const prevCountRef = useRef(0);
   const [page, setPage] = useState("dashboard");
+  const [editingItem, setEditingItem] = useState(null);
 
   // Undo state
   const undoTimerRef = useRef(null);
@@ -233,10 +235,10 @@ export default function App() {
               ↻ Refresh
             </button>
             <button
-              onClick={() => setPage("add-menu")}
+              onClick={() => setPage("manage-menu")}
               className="px-3 py-2 bg-green-600 text-white rounded-md"
             >
-              + Add Menu Item
+              Manage Menu
             </button>
             <div className="text-xs text-slate-500 dark:text-slate-300 ml-2">
               <span className="inline-flex items-center gap-2">
@@ -502,9 +504,22 @@ export default function App() {
               )}
             </main>
           </>
-        ) : (
+        ) : page === "add-menu" ? (
           <AddMenuItem onBack={() => setPage("dashboard")} />
-        )}
+        ) : page === "manage-menu" ? (
+          <ManageMenu
+            onEdit={(item) => {
+              setEditingItem(item);
+              setPage("edit-menu");
+            }}
+          />
+        ) : page === "edit-menu" ? (
+          <AddMenuItem
+            initial={editingItem}
+            onBack={() => setPage("manage-menu")}
+            onSaved={() => setPage("manage-menu")}
+          />
+        ) : null}
 
         {/* Undo toast */}
         {pendingUndo ? (

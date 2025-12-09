@@ -27,4 +27,10 @@ router.get("/:id", menuController.getItemById);
 // @access  Public for now
 router.post("/", menuController.createItem);
 
+// Update item
+router.put("/:id", menuController.updateItem);
+
+// Delete item
+router.delete("/:id", menuController.deleteItem);
+
 module.exports = router;

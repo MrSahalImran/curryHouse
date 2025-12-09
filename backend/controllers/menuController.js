@@ -1,4 +1,6 @@
 const MenuItem = require("../models/MenuItem");
+const fs = require("fs");
+const path = require("path");
 
 // Helper to compute a public, reachable image URL for responses
 function publicImageUrl(image, req) {
@@ -11,7 +13,9 @@ function publicImageUrl(image, req) {
     try {
       const urlObj = new URL(image);
       if (urlObj.hostname === "localhost" || urlObj.hostname === "127.0.0.1") {
-        return `${proto}://${host}${urlObj.pathname}${urlObj.search || ""}${urlObj.hash || ""}`;
+        return `${proto}://${host}${urlObj.pathname}${urlObj.search || ""}${
+          urlObj.hash || ""
+        }`;
       }
       return image; // absolute and not localhost
     } catch (e) {
@@ -143,5 +147,90 @@ exports.createItem = async (req, res) => {
       success: false,
       message: "Server error while creating menu item",
     });
+  }
+};
+
+// Update menu item
+exports.updateItem = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { name, description, price, category, tags, image } = req.body;
+    const tagsArray = Array.isArray(tags)
+      ? tags
+      : typeof tags === "string" && tags.length
+      ? tags.split(",").map((t) => t.trim())
+      : [];
+
+    const update = {
+      name,
+      description,
+      price: price !== undefined ? Number(price) : undefined,
+      category,
+      tags: tagsArray,
+    };
+
+    if (image !== undefined) update.image = image || undefined;
+
+    const item = await MenuItem.findById(id);
+    if (!item)
+      return res
+        .status(404)
+        .json({ success: false, message: "Menu item not found" });
+
+    // if replacing image and old image is local, attempt to delete old file
+    if (update.image && item.image && item.image.includes("/uploads/")) {
+      try {
+        const filename = item.image.split("/uploads/").pop();
+        const filePath = path.join(__dirname, "..", "uploads", filename);
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      } catch (e) {
+        // ignore unlink errors
+      }
+    }
+
+    const updated = await MenuItem.findByIdAndUpdate(id, update, { new: true });
+    res.json({ success: true, data: updated });
+  } catch (error) {
+    console.error("Update menu item error:", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Server error while updating menu item",
+      });
+  }
+};
+
+// Delete menu item
+exports.deleteItem = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const item = await MenuItem.findById(id);
+    if (!item)
+      return res
+        .status(404)
+        .json({ success: false, message: "Menu item not found" });
+
+    // attempt to delete local upload
+    if (item.image && item.image.includes("/uploads/")) {
+      try {
+        const filename = item.image.split("/uploads/").pop();
+        const filePath = path.join(__dirname, "..", "uploads", filename);
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    await MenuItem.findByIdAndDelete(id);
+    res.json({ success: true, message: "Menu item deleted" });
+  } catch (error) {
+    console.error("Delete menu item error:", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Server error while deleting menu item",
+      });
   }
 };

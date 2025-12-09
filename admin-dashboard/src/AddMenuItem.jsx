@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
 const API_URL = "http://localhost:5000/api";
 
-export default function AddMenuItem({ onBack }) {
+export default function AddMenuItem({ onBack, initial = null, onSaved }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState(0);
@@ -12,6 +12,16 @@ export default function AddMenuItem({ onBack }) {
   const [imageFile, setImageFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+
+  useEffect(() => {
+    if (initial) {
+      setName(initial.name || "");
+      setDescription(initial.description || "");
+      setPrice(initial.price || 0);
+      setCategory(initial.category || "Biryani");
+      setTags((initial.tags || []).join(", "));
+    }
+  }, [initial]);
 
   const handleFileChange = (e) => {
     const f = e.target.files && e.target.files[0];
@@ -25,7 +35,8 @@ export default function AddMenuItem({ onBack }) {
     const res = await axios.post(`${API_URL}/uploads`, fd, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    return res.data?.data?.url;
+    // prefer returned path if available
+    return res.data?.data?.path || res.data?.data?.url;
   };
 
   const handleSubmit = async (e) => {
@@ -33,10 +44,10 @@ export default function AddMenuItem({ onBack }) {
     setLoading(true);
     setMessage(null);
     try {
-      let imageUrl = null;
+      let imageVal = initial?.image || null;
       if (imageFile) {
         const uploaded = await uploadImage();
-        imageUrl = uploaded;
+        imageVal = uploaded;
       }
 
       const payload = {
@@ -45,25 +56,38 @@ export default function AddMenuItem({ onBack }) {
         price,
         category,
         tags,
-        image: imageUrl,
+        image: imageVal,
       };
 
-      const res = await axios.post(`${API_URL}/menu`, payload);
-      if (res.data?.success) {
-        setMessage("Menu item created successfully");
-        // clear form
-        setName("");
-        setDescription("");
-        setPrice(0);
-        setCategory("Biryani");
-        setTags("");
-        setImageFile(null);
+      let res;
+      if (initial && initial._id) {
+        res = await axios.put(`${API_URL}/menu/${initial._id}`, payload);
       } else {
-        setMessage("Failed to create menu item");
+        res = await axios.post(`${API_URL}/menu`, payload);
+      }
+
+      if (res.data?.success) {
+        setMessage(
+          initial ? "Menu item updated" : "Menu item created successfully"
+        );
+        // clear form if new
+        if (!initial) {
+          setName("");
+          setDescription("");
+          setPrice(0);
+          setCategory("Biryani");
+          setTags("");
+          setImageFile(null);
+        }
+        if (onSaved) onSaved(res.data.data);
+      } else {
+        setMessage("Failed to save menu item");
       }
     } catch (err) {
-      console.error(err);
-      setMessage(err?.response?.data?.message || "Error creating item");
+      console.error("Save error:", err);
+      const msg =
+        err?.response?.data?.message || err.message || "Error saving item";
+      setMessage(msg);
     } finally {
       setLoading(false);
     }
@@ -72,7 +96,9 @@ export default function AddMenuItem({ onBack }) {
   return (
     <div className="bg-white/95 dark:bg-slate-800/70 p-6 rounded-lg shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">Add Menu Item</h2>
+        <h2 className="text-xl font-bold">
+          {initial ? "Edit" : "Add"} Menu Item
+        </h2>
         <button
           onClick={onBack}
           className="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-md"
@@ -132,7 +158,7 @@ export default function AddMenuItem({ onBack }) {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium">Tags (comma)</label>
+            <label className="block text-sm font medium">Tags (comma)</label>
             <input
               value={tags}
               onChange={(e) => setTags(e.target.value)}
@@ -146,6 +172,8 @@ export default function AddMenuItem({ onBack }) {
           <input type="file" accept="image/*" onChange={handleFileChange} />
           {imageFile ? (
             <div className="text-sm mt-2">Selected: {imageFile.name}</div>
+          ) : initial?.image ? (
+            <div className="text-sm mt-2">Current: {initial.image}</div>
           ) : null}
         </div>
 
@@ -155,7 +183,7 @@ export default function AddMenuItem({ onBack }) {
             disabled={loading}
             className="px-4 py-2 bg-orange-500 text-white rounded-md"
           >
-            {loading ? "Saving..." : "Create Item"}
+            {loading ? "Saving..." : initial ? "Update Item" : "Create Item"}
           </button>
         </div>
 
