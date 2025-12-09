@@ -226,7 +226,7 @@ export default function App() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search order#, name or email"
-              className="px-3 py-2 border rounded-md w-64 focus:outline-none"
+              className="px-3 py-2 border rounded-md w-64 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-600 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none"
             />
             <button
               onClick={() => fetchOrders()}

@@ -105,7 +105,7 @@ export default function ManageMenu({ onEdit }) {
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value)}
             placeholder="New category name"
-            className="px-2 py-1 border rounded w-64"
+            className="px-2 py-1 border rounded w-64 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-600 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none"
           />
           <button
             onClick={handleAddCategory}
@@ -119,7 +119,7 @@ export default function ManageMenu({ onEdit }) {
           {categories.map((c) => (
             <div
               key={c}
-              className="flex items-center gap-2 bg-slate-100 px-2 py-1 rounded"
+              className="flex items-center gap-2 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-slate-800 dark:text-slate-100"
             >
               <span className="text-sm">{c}</span>
               {c !== "All" && (

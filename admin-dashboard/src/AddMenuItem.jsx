@@ -130,7 +130,7 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 w-full p-2 border rounded-md"
+            className="mt-1 w-full p-2 border rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-600 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none"
           />
         </div>
 
@@ -140,7 +140,7 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
             required
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="mt-1 w-full p-2 border rounded-md"
+            className="mt-1 w-full p-2 border rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-600 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none"
           />
         </div>
 
@@ -153,7 +153,7 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
               step="0.01"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              className="mt-1 w-full p-2 border rounded-md"
+              className="mt-1 w-full p-2 border rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-600 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none"
             />
           </div>
           <div>
@@ -161,7 +161,7 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="mt-1 w-full p-2 border rounded-md"
+              className="mt-1 w-full p-2 border rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-600 focus:outline-none"
             >
               {categories.length ? (
                 categories.map((c) => <option key={c}>{c}</option>)
@@ -184,7 +184,7 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
             <input
               value={tags}
               onChange={(e) => setTags(e.target.value)}
-              className="mt-1 w-full p-2 border rounded-md"
+              className="mt-1 w-full p-2 border rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-600 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none"
             />
           </div>
         </div>
