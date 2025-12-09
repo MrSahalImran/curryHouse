@@ -1,5 +1,33 @@
 const MenuItem = require("../models/MenuItem");
 
+// Helper to compute a public, reachable image URL for responses
+function publicImageUrl(image, req) {
+  if (!image) return null;
+  const host = req.get("host");
+  const proto = req.protocol;
+
+  // If absolute but points to localhost/127.0.0.1, rewrite host to request host
+  if (/^https?:\/\//i.test(image)) {
+    try {
+      const urlObj = new URL(image);
+      if (urlObj.hostname === "localhost" || urlObj.hostname === "127.0.0.1") {
+        return `${proto}://${host}${urlObj.pathname}${urlObj.search || ""}${urlObj.hash || ""}`;
+      }
+      return image; // absolute and not localhost
+    } catch (e) {
+      return image;
+    }
+  }
+
+  // If relative path like /uploads/xxx
+  if (image.startsWith("/")) {
+    return `${proto}://${host}${image}`;
+  }
+
+  // Otherwise assume it's a filename under /uploads
+  return `${proto}://${host}/uploads/${image}`;
+}
+
 exports.getMenu = async (req, res) => {
   try {
     const { category, tag, search } = req.query;
@@ -16,7 +44,13 @@ exports.getMenu = async (req, res) => {
       isPopular: -1,
       createdAt: -1,
     });
-    res.json({ success: true, count: menuItems.length, data: menuItems });
+    // Map images to public URLs for the client (avoid requiring mobile changes)
+    const mapped = menuItems.map((mi) => {
+      const obj = mi.toObject ? mi.toObject() : { ...mi };
+      obj.image = publicImageUrl(obj.image, req) || obj.image;
+      return obj;
+    });
+    res.json({ success: true, count: mapped.length, data: mapped });
   } catch (error) {
     console.error("Get menu error:", error);
     res.status(500).json({
@@ -46,7 +80,9 @@ exports.getItemById = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, message: "Menu item not found" });
-    res.json({ success: true, data: menuItem });
+    const obj = menuItem.toObject ? menuItem.toObject() : { ...menuItem };
+    obj.image = publicImageUrl(obj.image, req) || obj.image;
+    res.json({ success: true, data: obj });
   } catch (error) {
     console.error("Get menu item error:", error);
     res.status(500).json({
@@ -59,7 +95,12 @@ exports.getItemById = async (req, res) => {
 exports.getPopularItems = async (req, res) => {
   try {
     const popularItems = await MenuItem.find({ isPopular: true }).limit(10);
-    res.json({ success: true, count: popularItems.length, data: popularItems });
+    const mapped = popularItems.map((mi) => {
+      const obj = mi.toObject ? mi.toObject() : { ...mi };
+      obj.image = publicImageUrl(obj.image, req) || obj.image;
+      return obj;
+    });
+    res.json({ success: true, count: mapped.length, data: mapped });
   } catch (error) {
     console.error("Get popular items error:", error);
     res.status(500).json({
