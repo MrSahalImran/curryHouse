@@ -402,6 +402,8 @@ export default function CartScreen() {
       setAuthPromptVisible(true);
       return;
     }
+    // start fresh extras for each new checkout
+    setExtraSelections({});
     setModalVisible(true);
     setStep(1);
   };
@@ -446,6 +448,8 @@ export default function CartScreen() {
     setModalVisible(false);
     if (result.success) {
       clearCart();
+      // reset extras so next order starts from 0
+      setExtraSelections({});
       Alert.alert(
         "Order Placed!",
         `Your order #${result.order.orderNumber} has been placed successfully!`,
@@ -458,6 +462,7 @@ export default function CartScreen() {
         ]
       );
     } else {
+      // keep selections in case user wants to retry, but ensure modal is closed
       Alert.alert("Error", result.error || "Failed to place order");
     }
   };
@@ -537,7 +542,10 @@ export default function CartScreen() {
         visible={modalVisible}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() => {
+          setModalVisible(false);
+          setExtraSelections({});
+        }}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -705,7 +713,10 @@ export default function CartScreen() {
               )}
               <TouchableOpacity
                 style={styles.cancelBtn}
-                onPress={() => setModalVisible(false)}
+                onPress={() => {
+                  setModalVisible(false);
+                  setExtraSelections({});
+                }}
               >
                 <Text style={styles.cancelBtnText}>Cancel</Text>
               </TouchableOpacity>
@@ -719,6 +730,8 @@ export default function CartScreen() {
         onCancel={() => setAuthPromptVisible(false)}
         onLogin={() => {
           setAuthPromptVisible(false);
+          // clear any pending extras when forcing login and closing modal
+          setExtraSelections({});
           setModalVisible(false);
           router.push("/login");
         }}
