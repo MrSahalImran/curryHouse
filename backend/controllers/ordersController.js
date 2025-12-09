@@ -24,11 +24,23 @@ exports.createOrder = async (req, res) => {
 
     // Delivery address handling removed — orders no longer store deliveryAddress
 
-    // Generate unique order number
-    const orderNumber = `ORD-${Date.now()}-${Math.random()
-      .toString(36)
-      .substring(2, 7)
-      .toUpperCase()}`;
+    // Generate sequential order number starting from M-1 (e.g., M-1, M-2)
+    let seq = (await Order.countDocuments()) || 0;
+    let orderNumber = `M-${seq + 1}`;
+    // Ensure uniqueness in case of race; try a few times then fallback to timestamp-based
+    let exists = await Order.findOne({ orderNumber });
+    let attempts = 0;
+    while (exists && attempts < 5) {
+      seq = (await Order.countDocuments()) || 0;
+      orderNumber = `M-${seq + 1}`;
+      exists = await Order.findOne({ orderNumber });
+      attempts += 1;
+    }
+    if (exists) {
+      orderNumber = `M-${Date.now()}-${
+        Math.floor(Math.random() * 9000) + 1000
+      }`;
+    }
 
     const order = new Order({
       user: req.user._id,
