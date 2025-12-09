@@ -22,4 +22,9 @@ router.get("/popular/items", menuController.getPopularItems);
 // @access  Public
 router.get("/:id", menuController.getItemById);
 
+// @route   POST /api/menu
+// @desc    Create a new menu item (admin)
+// @access  Public for now
+router.post("/", menuController.createItem);
+
 module.exports = router;

@@ -68,3 +68,39 @@ exports.getPopularItems = async (req, res) => {
     });
   }
 };
+
+// Create a new menu item (admin)
+exports.createItem = async (req, res) => {
+  try {
+    const { name, description, price, category, tags, image } = req.body;
+    if (!name || !description || !price || !category) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required fields" });
+    }
+
+    const tagsArray = Array.isArray(tags)
+      ? tags
+      : typeof tags === "string" && tags.length
+      ? tags.split(",").map((t) => t.trim())
+      : [];
+
+    const menuItem = new MenuItem({
+      name,
+      description,
+      price: Number(price),
+      category,
+      tags: tagsArray,
+      image: image || undefined,
+    });
+
+    await menuItem.save();
+    res.json({ success: true, data: menuItem });
+  } catch (error) {
+    console.error("Create menu item error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while creating menu item",
+    });
+  }
+};
