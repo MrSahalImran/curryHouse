@@ -62,7 +62,6 @@ export default function EditProfileScreen() {
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
-      <Text style={styles.title}>Edit Profile</Text>
       <View style={styles.avatarSection}>
         <Image
           source={{
