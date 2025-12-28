@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { COLORS } from "../../config/config";
+import { COLORS } from "../config/config";
 
 export default function AuthPromptModal({
   visible,
@@ -9,6 +9,8 @@ export default function AuthPromptModal({
   onLogin = () => {},
   title = "Please login to continue",
   message = "You need to be signed in to place an order. Please login to continue.",
+  primaryText = "Login",
+  cancelText = "Cancel",
 }) {
   return (
     <Modal
@@ -26,10 +28,10 @@ export default function AuthPromptModal({
           <Text style={styles.message}>{message}</Text>
           <View style={styles.row}>
             <TouchableOpacity style={styles.cancelBtn} onPress={onCancel}>
-              <Text style={styles.cancelText}>Cancel</Text>
+              <Text style={styles.cancelText}>{cancelText}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.loginBtn} onPress={onLogin}>
-              <Text style={styles.loginText}>Login</Text>
+              <Text style={styles.loginText}>{primaryText}</Text>
             </TouchableOpacity>
           </View>
         </View>

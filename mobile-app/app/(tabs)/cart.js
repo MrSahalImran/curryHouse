@@ -18,7 +18,7 @@ import { COLORS } from "../../config/config";
 import useCartStore from "../../store/cartStore";
 import useOrderStore from "../../store/orderStore";
 import useAuthStore from "../../store/authStore";
-import AuthPromptModal from "../components/AuthPromptModal";
+import AuthPromptModal from "../../components/AuthPromptModal";
 import { useState, useEffect } from "react";
 
 // Optional extras catalog (static for now)

@@ -4,13 +4,12 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RESTAURANT_INFO } from "../../../config/config";
 import useAuthStore from "../../../store/authStore";
-import AuthPromptModal from "../../components/AuthPromptModal";
+import AuthPromptModal from "../../../components/AuthPromptModal";
 import { useState } from "react";
 
 export default function ProfileScreen() {
@@ -34,19 +33,10 @@ export default function ProfileScreen() {
 
   const [authPromptVisible, setAuthPromptVisible] = useState(false);
   const [pendingRoute, setPendingRoute] = useState(null);
-
+  const [pendingAction, setPendingAction] = useState(null);
   const handleLogout = () => {
-    Alert.alert("Logout", "Are you sure you want to logout?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Logout",
-        style: "destructive",
-        onPress: async () => {
-          await logout();
-          router.replace("/login");
-        },
-      },
-    ]);
+    setPendingAction("logout");
+    setAuthPromptVisible(true);
   };
 
   return (
@@ -194,12 +184,35 @@ export default function ProfileScreen() {
 
       {isMainProfile && <Text style={styles.version}>Version 1.0.0</Text>}
       <AuthPromptModal
-        message="You need to login in order to access that."
+        title={pendingAction === "logout" ? "Confirm Logout" : undefined}
+        message={
+          pendingAction === "logout"
+            ? "Are you sure you want to logout?"
+            : "You need to login in order to access that."
+        }
+        primaryText={pendingAction === "logout" ? "Logout" : "Login"}
+        cancelText={"Cancel"}
         visible={authPromptVisible}
-        onCancel={() => setAuthPromptVisible(false)}
-        onLogin={() => {
+        onCancel={() => {
           setAuthPromptVisible(false);
           setPendingRoute(null);
+          setPendingAction(null);
+        }}
+        onLogin={async () => {
+          setAuthPromptVisible(false);
+          // perform pending action if any
+          if (pendingAction === "logout") {
+            await logout();
+            setPendingAction(null);
+            router.replace("/login");
+            return;
+          }
+          if (pendingRoute) {
+            const route = pendingRoute;
+            setPendingRoute(null);
+            router.push(route);
+            return;
+          }
           router.push("/login");
         }}
       />
