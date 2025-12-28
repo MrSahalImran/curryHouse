@@ -6,12 +6,12 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
 } from "react-native";
 import { COLORS } from "../../../config/config";
 import { userAPI, authAPI } from "../../../services/api";
 import useAuthStore from "../../../store/authStore";
 import { useRouter } from "expo-router";
+import useUIStore from "../../../store/uiStore";
 
 export default function NotificationsScreen() {
   const router = useRouter();
@@ -20,6 +20,7 @@ export default function NotificationsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [resending, setResending] = useState(false);
+  const showAlert = useUIStore((s) => s.showAlert);
 
   const load = async () => {
     setLoading(true);
@@ -50,31 +51,51 @@ export default function NotificationsScreen() {
   };
 
   const handleCardResend = async () => {
-    if (!currentUser?.email) return Alert.alert("Error", "No email available");
+    if (!currentUser?.email) {
+      showAlert({
+        title: "Error",
+        message: "No email available",
+        showCancel: false,
+      });
+      return;
+    }
     setResending(true);
     try {
       await authAPI.sendOtp(currentUser.email);
-      Alert.alert("OTP Sent", `OTP has been sent to ${currentUser.email}`);
+      showAlert({
+        title: "OTP Sent",
+        message: `OTP has been sent to ${currentUser.email}`,
+        showCancel: false,
+      });
     } catch (err) {
-      Alert.alert(
-        "Error",
-        err?.response?.data?.message || "Failed to send OTP"
-      );
+      showAlert({
+        title: "Error",
+        message: err?.response?.data?.message || "Failed to send OTP",
+        showCancel: false,
+      });
     } finally {
       setResending(false);
     }
   };
 
   const handleCardVerifyNow = async () => {
-    if (!currentUser?.email) return Alert.alert("Error", "No email available");
+    if (!currentUser?.email) {
+      showAlert({
+        title: "Error",
+        message: "No email available",
+        showCancel: false,
+      });
+      return;
+    }
     setResending(true);
     try {
       await authAPI.sendOtp(currentUser.email);
     } catch (err) {
-      Alert.alert(
-        "Error",
-        err?.response?.data?.message || "Failed to send OTP"
-      );
+      showAlert({
+        title: "Error",
+        message: err?.response?.data?.message || "Failed to send OTP",
+        showCancel: false,
+      });
     } finally {
       setResending(false);
       const email = currentUser?.email || "";

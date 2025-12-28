@@ -8,16 +8,17 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../config/config";
 import useAuthStore from "../store/authStore";
+import useUIStore from "../store/uiStore";
 
 export default function RegisterScreen() {
   const router = useRouter();
   const { register, isLoading } = useAuthStore();
+  const showAlert = useUIStore((s) => s.showAlert);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -35,17 +36,29 @@ export default function RegisterScreen() {
       !formData.phone ||
       !formData.password
     ) {
-      Alert.alert("Error", "Please fill in all fields");
+      showAlert({
+        title: "Error",
+        message: "Please fill in all fields",
+        showCancel: false,
+      });
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
+      showAlert({
+        title: "Error",
+        message: "Passwords do not match",
+        showCancel: false,
+      });
       return;
     }
 
     if (formData.password.length < 6) {
-      Alert.alert("Error", "Password must be at least 6 characters");
+      showAlert({
+        title: "Error",
+        message: "Password must be at least 6 characters",
+        showCancel: false,
+      });
       return;
     }
 
@@ -60,7 +73,11 @@ export default function RegisterScreen() {
       // Navigate to OTP verification screen after registration
       router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
     } else {
-      Alert.alert("Registration Failed", result.error);
+      showAlert({
+        title: "Registration Failed",
+        message: result.error,
+        showCancel: false,
+      });
     }
   };
 

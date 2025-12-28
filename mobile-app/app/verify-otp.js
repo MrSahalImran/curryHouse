@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
@@ -13,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../config/config";
 import { authAPI } from "../services/api";
 import useAuthStore from "../store/authStore";
+import useUIStore from "../store/uiStore";
 
 export default function VerifyOtpScreen() {
   const router = useRouter();
@@ -22,6 +22,7 @@ export default function VerifyOtpScreen() {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
+  const showAlert = useUIStore((s) => s.showAlert);
 
   useEffect(() => {
     if (!email) {
@@ -34,12 +35,17 @@ export default function VerifyOtpScreen() {
     setResending(true);
     try {
       await authAPI.sendOtp(email);
-      Alert.alert("OTP Sent", `OTP has been sent to ${email}`);
+      showAlert({
+        title: "OTP Sent",
+        message: `OTP has been sent to ${email}`,
+        showCancel: false,
+      });
     } catch (err) {
-      Alert.alert(
-        "Error",
-        err?.response?.data?.message || "Failed to send OTP"
-      );
+      showAlert({
+        title: "Error",
+        message: err?.response?.data?.message || "Failed to send OTP",
+        showCancel: false,
+      });
     } finally {
       setResending(false);
     }
@@ -47,7 +53,11 @@ export default function VerifyOtpScreen() {
 
   const handleVerify = async () => {
     if (!otp || otp.trim().length === 0) {
-      Alert.alert("Error", "Please enter the OTP");
+      showAlert({
+        title: "Error",
+        message: "Please enter the OTP",
+        showCancel: false,
+      });
       return;
     }
     setLoading(true);
@@ -65,17 +75,25 @@ export default function VerifyOtpScreen() {
         } catch (e) {
           console.warn("Failed to refresh user after verify:", e?.message || e);
         }
-        Alert.alert("Verified", "Email verified successfully", [
-          { text: "OK", onPress: () => router.replace("/(tabs)") },
-        ]);
+        showAlert({
+          title: "Verified",
+          message: "Email verified successfully",
+          onConfirm: () => router.replace("/(tabs)"),
+          showCancel: false,
+        });
       } else {
-        Alert.alert("Verification Failed", res.message || "Invalid OTP");
+        showAlert({
+          title: "Verification Failed",
+          message: res.message || "Invalid OTP",
+          showCancel: false,
+        });
       }
     } catch (err) {
-      Alert.alert(
-        "Error",
-        err?.response?.data?.message || "Failed to verify OTP"
-      );
+      showAlert({
+        title: "Error",
+        message: err?.response?.data?.message || "Failed to verify OTP",
+        showCancel: false,
+      });
     } finally {
       setLoading(false);
     }

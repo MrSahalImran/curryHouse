@@ -5,7 +5,6 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
-  Alert,
   Modal,
   TextInput,
   ScrollView,
@@ -19,6 +18,7 @@ import useCartStore from "../../store/cartStore";
 import useOrderStore from "../../store/orderStore";
 import useAuthStore from "../../store/authStore";
 import AuthPromptModal from "../../components/AuthPromptModal";
+import useUIStore from "../../store/uiStore";
 import { useState, useEffect } from "react";
 
 // Optional extras catalog (static for now)
@@ -382,6 +382,8 @@ export default function CartScreen() {
   const [spiceModalVisible, setSpiceModalVisible] = useState(false);
   const [spiceTargetItem, setSpiceTargetItem] = useState(null);
   const SPICE_LEVELS = ["Mild", "Medium", "Hot", "Extra Hot"];
+  // use global UI store for alerts so they show immediately from any screen
+  const showAlert = useUIStore((s) => s.showAlert);
 
   const extrasTotal = Object.entries(extraSelections).reduce(
     (sum, [id, qty]) => {
@@ -395,7 +397,11 @@ export default function CartScreen() {
 
   const handleCheckout = () => {
     if (items.length === 0) {
-      Alert.alert("Empty Cart", "Please add items to your cart first");
+      showAlert({
+        title: "Empty Cart",
+        message: "Please add items to your cart first",
+        showCancel: false,
+      });
       return;
     }
     if (!user) {
@@ -451,20 +457,24 @@ export default function CartScreen() {
       clearCart();
       // reset extras so next order starts from 0
       setExtraSelections({});
-      Alert.alert(
-        "Order Placed!",
-        `Your order #${result.order.orderNumber} has been placed successfully!`,
-        [
-          {
-            text: "View Order",
-            onPress: () => router.push("/orders"),
-          },
-          { text: "OK" },
-        ]
-      );
+      showAlert({
+        title: "Order Placed!",
+        message: `Your order #${result.order.orderNumber} has been placed successfully!`,
+        confirmText: "View Order",
+        cancelText: "OK",
+        showCancel: true,
+        onConfirm: () => router.push("/orders"),
+        onCancel: () => {},
+      });
     } else {
       // keep selections in case user wants to retry, but ensure modal is closed
-      Alert.alert("Error", result.error || "Failed to place order");
+      showAlert({
+        title: "Error",
+        message: result.error || "Failed to place order",
+        confirmText: "OK",
+        showCancel: false,
+        onConfirm: () => {},
+      });
     }
   };
 
@@ -782,6 +792,7 @@ export default function CartScreen() {
           router.push("/login");
         }}
       />
+
       {/* Spice selector modal (sibling to order modal) */}
       <Modal
         visible={spiceModalVisible}

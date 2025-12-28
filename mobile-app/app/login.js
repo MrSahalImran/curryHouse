@@ -8,23 +8,28 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../config/config";
 import useAuthStore from "../store/authStore";
+import useUIStore from "../store/uiStore";
 
 export default function LoginScreen() {
   const router = useRouter();
   const { login, isLoading } = useAuthStore();
+  const showAlert = useUIStore((s) => s.showAlert);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
+      showAlert({
+        title: "Error",
+        message: "Please fill in all fields",
+        showCancel: false,
+      });
       return;
     }
 
@@ -33,7 +38,11 @@ export default function LoginScreen() {
     if (result.success) {
       router.replace("/(tabs)");
     } else {
-      Alert.alert("Login Failed", result.error);
+      showAlert({
+        title: "Login Failed",
+        message: result.error,
+        showCancel: false,
+      });
     }
   };
 

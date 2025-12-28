@@ -14,6 +14,7 @@ import useAuthStore from "../../../store/authStore";
 import { COLORS } from "../../../config/config";
 import { userAPI } from "../../../services/api";
 import { useRouter } from "expo-router";
+import AlertModal from "../../../components/AlertModal";
 
 export default function EditProfileScreen() {
   const { user, updateUser } = useAuthStore();
@@ -23,6 +24,9 @@ export default function EditProfileScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   const handleSave = async () => {
     if (!name.trim() || !phone.trim()) {
@@ -35,9 +39,9 @@ export default function EditProfileScreen() {
       const res = await userAPI.updateProfile({ name, phone });
       if (res.success) {
         updateUser(res.user);
-        Alert.alert("Profile updated!", "Your profile has been updated.", [
-          { text: "OK", onPress: () => router.back() },
-        ]);
+        setAlertTitle("Profile updated!");
+        setAlertMessage("Your profile has been updated.");
+        setAlertVisible(true);
       } else {
         setError(res.message || "Failed to update profile.");
       }
@@ -110,6 +114,16 @@ export default function EditProfileScreen() {
           )}
         </TouchableOpacity>
       </View>
+      <AlertModal
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onCancel={() => setAlertVisible(false)}
+        onConfirm={() => {
+          setAlertVisible(false);
+          router.back();
+        }}
+      />
     </ScrollView>
   );
 }

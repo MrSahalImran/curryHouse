@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Alert,
 } from "react-native";
 import useFavoritesStore from "../../../store/favoritesStore";
+import AlertModal from "../../../components/AlertModal";
 import FavoriteItem from "../../../components/FavoriteItem";
 import { COLORS } from "../../../config/config";
 
@@ -20,15 +21,16 @@ export default function FavoritesScreen() {
   }, []);
 
   const handleRemove = (itemId) => {
-    Alert.alert("Remove Favorite", "Remove this dish from your favorites?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Remove",
-        style: "destructive",
-        onPress: () => removeFavorite(itemId),
-      },
-    ]);
+    setAlertTitle("Remove Favorite");
+    setAlertMessage("Remove this dish from your favorites?");
+    setAlertConfirm(() => () => removeFavorite(itemId));
+    setAlertVisible(true);
   };
+
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertConfirm, setAlertConfirm] = useState(() => () => {});
 
   return (
     <View style={styles.container}>
@@ -52,6 +54,18 @@ export default function FavoritesScreen() {
         ListEmptyComponent={
           !loading && <Text style={styles.empty}>No favorites yet.</Text>
         }
+      />
+      <AlertModal
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        showCancel={true}
+        onCancel={() => setAlertVisible(false)}
+        onConfirm={() => {
+          setAlertVisible(false);
+          alertConfirm();
+        }}
+        confirmText={"Remove"}
       />
     </View>
   );
