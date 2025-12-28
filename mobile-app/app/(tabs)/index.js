@@ -111,37 +111,82 @@ export default function HomeScreen() {
           contentContainerStyle={{ paddingBottom: 8, paddingRight: 16 }}
         >
           {popularItems.map((item) => (
-            <View key={item._id} style={styles.menuCard}>
-              <Image
-                source={{
-                  uri:
-                    item.image ||
-                    "https://via.placeholder.com/300x200?text=No+Image",
-                }}
-                style={styles.menuImage}
-              />
-              <View style={styles.menuInfo}>
-                <Text style={styles.menuName} numberOfLines={1}>
-                  {item.name}
-                </Text>
-                <Text style={styles.menuDescription} numberOfLines={2}>
-                  {item.description}
-                </Text>
-                <View style={styles.menuFooter}>
-                  <Text style={styles.menuPrice}>kr {item.price}</Text>
-                  <TouchableOpacity
-                    style={styles.addButton}
-                    onPress={() => addItem(item)}
-                  >
-                    <Ionicons name="add" size={20} color={COLORS.white} />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
+            <MenuCard key={item._id} item={item} />
           ))}
         </ScrollView>
       </View>
     </ScrollView>
+  );
+}
+
+function MenuCard({ item }) {
+  const addItem = useCartStore((s) => s.addItem);
+  const increaseQuantity = useCartStore((s) => s.increaseQuantity);
+  const decreaseQuantity = useCartStore((s) => s.decreaseQuantity);
+  const quantity = useCartStore((s) => {
+    const it = s.items.find((i) => i._id === item._id);
+    return it ? it.quantity : 0;
+  });
+  const spice = (item.spiceLevel || "Medium").toString();
+  const SPICE_COLORS = {
+    Mild: { bg: "#E8F5E9", icon: COLORS.success, text: "#2E7D32" },
+    Medium: { bg: "#FFF3E0", icon: COLORS.primary, text: "#E65100" },
+    Hot: { bg: "#FFEBEE", icon: "#D32F2F", text: "#C62828" },
+    "Extra Hot": { bg: "#F3E5F5", icon: "#7B1FA2", text: "#6A1B9A" },
+  };
+  const spiceStyle = SPICE_COLORS[spice] || SPICE_COLORS.Medium;
+
+  return (
+    <View style={styles.menuCard}>
+      <Image
+        source={{
+          uri:
+            item.image || "https://via.placeholder.com/300x200?text=No+Image",
+        }}
+        style={styles.menuImage}
+      />
+      <View style={styles.menuInfo}>
+        <Text style={styles.menuName} numberOfLines={1}>
+          {item.name}
+        </Text>
+        <Text style={styles.menuDescription} numberOfLines={1}>
+          {item.description}
+        </Text>
+        <View style={[styles.tag, { backgroundColor: spiceStyle.bg }]}>
+          <Ionicons name="flame" size={12} color={spiceStyle.icon} />
+          <Text style={[styles.tagText, { color: spiceStyle.text }]}>
+            {item.spiceLevel}
+          </Text>
+        </View>
+        <View style={styles.menuFooter}>
+          <Text style={styles.menuPrice}>kr {item.price}</Text>
+          {quantity > 0 ? (
+            <View style={styles.qtyContainer}>
+              <TouchableOpacity
+                style={styles.qtyBtn}
+                onPress={() => decreaseQuantity(item._id)}
+              >
+                <Ionicons name="remove" size={18} color={COLORS.white} />
+              </TouchableOpacity>
+              <Text style={styles.qtyText}>{quantity}</Text>
+              <TouchableOpacity
+                style={styles.qtyBtn}
+                onPress={() => increaseQuantity(item._id)}
+              >
+                <Ionicons name="add" size={18} color={COLORS.white} />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => addItem(item)}
+            >
+              <Ionicons name="add" size={20} color={COLORS.white} />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+    </View>
   );
 }
 
@@ -282,7 +327,7 @@ const styles = StyleSheet.create({
   },
   menuInfo: {
     flex: 1,
-    padding: 12,
+    padding: 10,
     justifyContent: "space-between",
   },
   menuName: {
@@ -294,8 +339,7 @@ const styles = StyleSheet.create({
   menuDescription: {
     fontSize: 12,
     color: COLORS.textLight,
-    marginBottom: 8,
-    height: 32,
+    height: 26,
   },
   menuFooter: {
     flexDirection: "row",
@@ -309,10 +353,39 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: COLORS.primary,
-    width: 36,
-    height: 36,
+    width: 32,
+    height: 32,
     borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
   },
+  qtyContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "transparent",
+  },
+  qtyBtn: {
+    backgroundColor: COLORS.primary,
+    width: 32,
+    height: 32,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  qtyText: {
+    marginHorizontal: 8,
+    fontSize: 16,
+    color: COLORS.text,
+    minWidth: 16,
+    textAlign: "center",
+  },
+  tag: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: "flex-start",
+  },
+  tagText: { fontSize: 10, marginLeft: 4 },
 });
