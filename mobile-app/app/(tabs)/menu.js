@@ -116,6 +116,15 @@ export default function MenuScreen() {
     const quantity = getItemQuantity(item._id);
     const isFavorite = favorites.some((f) => f._id === item._id);
     const uri = item.image || "https://via.placeholder.com/300x200";
+    // Spice level color mapping
+    const spice = (item.spiceLevel || "Medium").toString();
+    const SPICE_COLORS = {
+      Mild: { bg: "#E8F5E9", icon: COLORS.success, text: "#2E7D32" },
+      Medium: { bg: "#FFF3E0", icon: COLORS.primary, text: "#E65100" },
+      Hot: { bg: "#FFEBEE", icon: "#D32F2F", text: "#C62828" },
+      "Extra Hot": { bg: "#F3E5F5", icon: "#7B1FA2", text: "#6A1B9A" },
+    };
+    const spiceStyle = SPICE_COLORS[spice] || SPICE_COLORS.Medium;
 
     return (
       <TouchableOpacity
@@ -149,13 +158,11 @@ export default function MenuScreen() {
           </Text>
 
           <View style={styles.itemMeta}>
-            <View style={styles.tag}>
-              <Ionicons name="flame" size={12} color={COLORS.primary} />
-              <Text style={styles.tagText}>{item.spiceLevel}</Text>
-            </View>
-            <View style={styles.tag}>
-              <Ionicons name="time" size={12} color={COLORS.textMuted} />
-              <Text style={styles.tagText}>{item.preparationTime} min</Text>
+            <View style={[styles.tag, { backgroundColor: spiceStyle.bg }]}>
+              <Ionicons name="flame" size={12} color={spiceStyle.icon} />
+              <Text style={[styles.tagText, { color: spiceStyle.text }]}>
+                {item.spiceLevel}
+              </Text>
             </View>
           </View>
 

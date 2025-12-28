@@ -184,7 +184,8 @@ exports.getPopularItems = async (req, res) => {
 // Create a new menu item (admin)
 exports.createItem = async (req, res) => {
   try {
-    const { name, description, price, category, tags, image } = req.body;
+    const { name, description, price, category, tags, image, spiceLevel } =
+      req.body;
     if (!name || !description || !price || !category) {
       return res
         .status(400)
@@ -204,6 +205,7 @@ exports.createItem = async (req, res) => {
       category,
       tags: tagsArray,
       image: image || undefined,
+      spiceLevel: spiceLevel || undefined,
       imagePublicId: req.body.imagePublicId || undefined,
     });
 
@@ -222,7 +224,8 @@ exports.createItem = async (req, res) => {
 exports.updateItem = async (req, res) => {
   try {
     const id = req.params.id;
-    const { name, description, price, category, tags, image } = req.body;
+    const { name, description, price, category, tags, image, spiceLevel } =
+      req.body;
     const tagsArray = Array.isArray(tags)
       ? tags
       : typeof tags === "string" && tags.length
@@ -235,6 +238,7 @@ exports.updateItem = async (req, res) => {
       price: price !== undefined ? Number(price) : undefined,
       category,
       tags: tagsArray,
+      spiceLevel: spiceLevel !== undefined ? spiceLevel : undefined,
     };
 
     if (image !== undefined) update.image = image || undefined;

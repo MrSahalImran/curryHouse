@@ -10,7 +10,8 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
   const [price, setPrice] = useState(0);
   const [category, setCategory] = useState("Biryani");
   const [categories, setCategories] = useState([]);
-  // Tags handling: selected tags array and custom tag input
+  const SPICE_LEVELS = ["Mild", "Medium", "Hot", "Extra Hot"];
+  const [spiceLevel, setSpiceLevel] = useState("Medium");
   const AVAILABLE_TAGS = [
     "Party",
     "Lunch",
@@ -36,13 +37,13 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
       setPrice(initial.price || 0);
       setCategory(initial.category || "Biryani");
       setTagsArr(initial.tags || []);
+      setSpiceLevel(initial.spiceLevel || "Medium");
     }
     // fetch categories for select
     const fetchCategories = async () => {
       try {
         const res = await axios.get(`${API_URL}/menu/categories`);
         const data = res.data?.data || [];
-        // remove "All" if present
         const filtered = data.filter((c) => c !== "All");
         setCategories(filtered);
         if (!initial) setCategory(filtered[0] || "Biryani");
@@ -92,6 +93,7 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
         price,
         category,
         tags: Array.isArray(tagsArr) ? tagsArr : [],
+        spiceLevel,
         image: imageVal,
         imagePublicId,
       };
@@ -114,6 +116,7 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
           setPrice(0);
           setCategory("Biryani");
           setTagsArr([]);
+          setSpiceLevel("Medium");
           setImageFile(null);
         }
         if (onSaved) onSaved(res.data.data);
@@ -176,6 +179,20 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
               onChange={(e) => setPrice(e.target.value)}
               className="mt-1 w-full p-2 border rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-600 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none"
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Spice Level</label>
+            <select
+              value={spiceLevel}
+              onChange={(e) => setSpiceLevel(e.target.value)}
+              className="mt-1 w-full p-2 border rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-600 focus:outline-none"
+            >
+              {SPICE_LEVELS.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium">Category</label>
