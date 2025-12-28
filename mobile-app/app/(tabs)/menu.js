@@ -27,7 +27,8 @@ export default function MenuScreen() {
     setSelectedCategory,
   } = useMenuStore();
 
-  const { addItem, getItemQuantity } = useCartStore();
+  const { addItem, getItemQuantity, increaseQuantity, decreaseQuantity } =
+    useCartStore();
   const {
     favorites = [],
     addFavorite,
@@ -168,18 +169,31 @@ export default function MenuScreen() {
 
           <View style={styles.itemFooter}>
             <Text style={styles.itemPrice}>kr {item.price}</Text>
-            <TouchableOpacity
-              style={styles.addToCartButton}
-              onPress={() => addItem(item)}
-            >
-              <Ionicons name="add" size={18} color={COLORS.white} />
-              <Text style={styles.addToCartText}>Add</Text>
-              {quantity > 0 && (
-                <View style={styles.quantityBadge}>
-                  <Text style={styles.quantityText}>{quantity}</Text>
-                </View>
-              )}
-            </TouchableOpacity>
+            {quantity > 0 ? (
+              <View style={styles.cartControls}>
+                <TouchableOpacity
+                  style={styles.ctrlBtn}
+                  onPress={() => decreaseQuantity(item._id)}
+                >
+                  <Ionicons name="remove" size={16} color={COLORS.white} />
+                </TouchableOpacity>
+                <Text style={styles.ctrlQty}>{quantity}</Text>
+                <TouchableOpacity
+                  style={styles.ctrlBtn}
+                  onPress={() => increaseQuantity(item._id)}
+                >
+                  <Ionicons name="add" size={16} color={COLORS.white} />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={styles.addToCartButton}
+                onPress={() => addItem(item)}
+              >
+                <Ionicons name="add" size={18} color={COLORS.white} />
+                <Text style={styles.addToCartText}>Add</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </TouchableOpacity>
@@ -361,6 +375,27 @@ const styles = StyleSheet.create({
   },
 
   quantityText: { color: COLORS.white, fontSize: 10 },
+
+  /* rectangular cart controls */
+  cartControls: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  ctrlBtn: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 6,
+    paddingVertical: 7.2,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  ctrlQty: {
+    marginHorizontal: 6,
+    fontSize: 14,
+    color: COLORS.text,
+    minWidth: 14,
+    textAlign: "center",
+  },
 
   emptyContainer: {
     alignItems: "center",
