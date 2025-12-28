@@ -19,6 +19,7 @@ export default function RegisterScreen() {
   const router = useRouter();
   const { register, isLoading } = useAuthStore();
   const showAlert = useUIStore((s) => s.showAlert);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -26,6 +27,7 @@ export default function RegisterScreen() {
     password: "",
     confirmPassword: "",
   });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -70,7 +72,6 @@ export default function RegisterScreen() {
     });
 
     if (result.success) {
-      // Navigate to OTP verification screen after registration
       router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
     } else {
       showAlert({
@@ -83,11 +84,12 @@ export default function RegisterScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
@@ -98,9 +100,11 @@ export default function RegisterScreen() {
           >
             <Ionicons name="arrow-back" size={24} color={COLORS.white} />
           </TouchableOpacity>
+
           <View style={styles.logo}>
             <Ionicons name="restaurant" size={60} color={COLORS.white} />
           </View>
+
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Join Curry House Jar</Text>
         </View>
@@ -113,8 +117,7 @@ export default function RegisterScreen() {
               style={styles.input}
               placeholder="Full Name"
               value={formData.name}
-              onChangeText={(text) => setFormData({ ...formData, name: text })}
-              autoCapitalize="words"
+              onChangeText={(t) => setFormData({ ...formData, name: t })}
               placeholderTextColor={COLORS.textMuted}
             />
           </View>
@@ -125,10 +128,9 @@ export default function RegisterScreen() {
               style={styles.input}
               placeholder="Email"
               value={formData.email}
-              onChangeText={(text) => setFormData({ ...formData, email: text })}
+              onChangeText={(t) => setFormData({ ...formData, email: t })}
               keyboardType="email-address"
               autoCapitalize="none"
-              autoComplete="email"
               placeholderTextColor={COLORS.textMuted}
             />
           </View>
@@ -139,7 +141,7 @@ export default function RegisterScreen() {
               style={styles.input}
               placeholder="Phone Number"
               value={formData.phone}
-              onChangeText={(text) => setFormData({ ...formData, phone: text })}
+              onChangeText={(t) => setFormData({ ...formData, phone: t })}
               keyboardType="phone-pad"
               placeholderTextColor={COLORS.textMuted}
             />
@@ -151,11 +153,8 @@ export default function RegisterScreen() {
               style={styles.input}
               placeholder="Password"
               value={formData.password}
-              onChangeText={(text) =>
-                setFormData({ ...formData, password: text })
-              }
+              onChangeText={(t) => setFormData({ ...formData, password: t })}
               secureTextEntry={!showPassword}
-              autoCapitalize="none"
               placeholderTextColor={COLORS.textMuted}
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
@@ -173,11 +172,10 @@ export default function RegisterScreen() {
               style={styles.input}
               placeholder="Confirm Password"
               value={formData.confirmPassword}
-              onChangeText={(text) =>
-                setFormData({ ...formData, confirmPassword: text })
+              onChangeText={(t) =>
+                setFormData({ ...formData, confirmPassword: t })
               }
               secureTextEntry={!showConfirmPassword}
-              autoCapitalize="none"
               placeholderTextColor={COLORS.textMuted}
             />
             <TouchableOpacity
@@ -204,15 +202,17 @@ export default function RegisterScreen() {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.loginLink}
-            onPress={() => router.back()}
-          >
-            <Text style={styles.loginText}>
-              Already have an account?{" "}
-              <Text style={styles.loginTextBold}>Login</Text>
-            </Text>
-          </TouchableOpacity>
+          <View style={{ paddingBottom: 24 }}>
+            <TouchableOpacity
+              style={styles.loginLink}
+              onPress={() => router.back()}
+            >
+              <Text style={styles.loginText}>
+                Already have an account?{" "}
+                <Text style={styles.loginTextBold}>Login</Text>
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -231,13 +231,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 60,
     paddingBottom: 30,
-    position: "relative",
   },
   backButton: {
     position: "absolute",
     left: 20,
     top: 60,
-    zIndex: 1,
   },
   logo: {
     width: 100,
@@ -252,7 +250,6 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     color: COLORS.white,
-    marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
@@ -260,7 +257,6 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   form: {
-    flex: 1,
     backgroundColor: COLORS.white,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
@@ -278,7 +274,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     marginLeft: 12,
-    fontSize: 16,
+    fontSize: 15,
     color: COLORS.text,
   },
   registerButton: {
@@ -287,7 +283,6 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: "center",
     marginTop: 8,
-    marginBottom: 16,
   },
   registerButtonDisabled: {
     opacity: 0.6,
@@ -299,11 +294,12 @@ const styles = StyleSheet.create({
   },
   loginLink: {
     alignItems: "center",
-    marginTop: 8,
+    marginTop: 16,
   },
   loginText: {
     fontSize: 14,
     color: COLORS.textLight,
+    marginBottom: 20,
   },
   loginTextBold: {
     color: COLORS.primary,
