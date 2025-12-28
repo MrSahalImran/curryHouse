@@ -11,10 +11,12 @@
       "resizeMode": "contain",
       "backgroundColor": "#FF6B35"
     },
+    "icon": "./assets/logo.png",
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.curryhousejar.app"
+      "bundleIdentifier": "com.curryhousejar.app",
+      "icon": "./assets/logo.png"
     },
     "android": {
       "adaptiveIcon": {

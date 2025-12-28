@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -9,12 +9,86 @@ import {
   Platform,
   ScrollView,
   Keyboard,
+  Animated,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../config/config";
 import { authAPI } from "../services/api";
 import useUIStore from "../store/uiStore";
+
+function OTPInput({ value, onChange, length = 6, onComplete, shakeAnim }) {
+  const inputs = useRef([]);
+  const digits = Array.from({ length }).map((_, i) => value?.[i] || "");
+
+  const handleChange = (text, index) => {
+    // handle pasted input or multi-char input
+    if (!text) {
+      const arr = digits.slice();
+      arr[index] = "";
+      onChange(arr.join(""));
+      return;
+    }
+
+    const ch = text.replace(/\D/g, "").slice(-1);
+    if (!ch) return;
+
+    const arr = digits.slice();
+    arr[index] = ch;
+    const newVal = arr.join("");
+    onChange(newVal);
+
+    if (index < length - 1) {
+      const next = inputs.current[index + 1];
+      if (next) setTimeout(() => next.focus(), 0);
+    } else {
+      // last input: blur to dismiss keyboard focus and then trigger complete
+      inputs.current[index]?.blur?.();
+      if (newVal.length === length) onComplete?.(newVal);
+    }
+  };
+
+  const handleKeyPress = (e, index) => {
+    if (e.nativeEvent.key !== "Backspace") return;
+
+    const arr = digits.slice();
+    if (digits[index]) {
+      // delete current digit
+      arr[index] = "";
+      onChange(arr.join(""));
+      return;
+    }
+
+    // current empty -> move to previous and clear it
+    if (index > 0) {
+      const prev = inputs.current[index - 1];
+      if (prev) {
+        setTimeout(() => prev.focus(), 0);
+      }
+      arr[index - 1] = "";
+      onChange(arr.join(""));
+    }
+  };
+
+  return (
+    <Animated.View
+      style={[styles.otpContainer, { transform: [{ translateX: shakeAnim }] }]}
+    >
+      {Array.from({ length }).map((_, i) => (
+        <TextInput
+          key={i}
+          ref={(r) => (inputs.current[i] = r)}
+          style={[styles.otpInput, digits[i] && styles.otpInputFilled]}
+          keyboardType="number-pad"
+          maxLength={1}
+          value={digits[i]}
+          onChangeText={(t) => handleChange(t, i)}
+          onKeyPress={(e) => handleKeyPress(e, i)}
+        />
+      ))}
+    </Animated.View>
+  );
+}
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
@@ -30,6 +104,11 @@ export default function ResetPasswordScreen() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const newPassRef = useRef(null);
+
+  const [seconds, setSeconds] = useState(60);
+
+  const shakeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const show = Keyboard.addListener("keyboardDidShow", () =>
@@ -48,11 +127,45 @@ export default function ResetPasswordScreen() {
     if (prefillEmail) setEmail(prefillEmail);
   }, [prefillEmail]);
 
-  const handleSubmit = async () => {
-    if (!email || !otp || !newPassword || !confirmPassword) {
+  useEffect(() => {
+    if (seconds === 0) return;
+    const timer = setTimeout(() => setSeconds((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [seconds]);
+
+  const triggerShake = () => {
+    Animated.sequence([
+      Animated.timing(shakeAnim, {
+        toValue: -8,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeAnim, {
+        toValue: 8,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeAnim, {
+        toValue: -5,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeAnim, {
+        toValue: 0,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const handleSubmit = async (submittedOtp) => {
+    const currentOtp = typeof submittedOtp === "string" ? submittedOtp : otp;
+
+    if (!email || currentOtp.length !== 6 || !newPassword || !confirmPassword) {
+      triggerShake();
       showAlert({
         title: "Error",
-        message: "Please fill all fields",
+        message: "Please fill all fields correctly",
         showCancel: false,
       });
       return;
@@ -80,7 +193,7 @@ export default function ResetPasswordScreen() {
     try {
       const res = await authAPI.resetPassword({
         email: email.trim(),
-        otp: otp.trim(),
+        otp: currentOtp.trim(),
         newPassword,
       });
 
@@ -92,22 +205,29 @@ export default function ResetPasswordScreen() {
           onConfirm: () => router.replace("/login"),
         });
       } else {
+        triggerShake();
         showAlert({
           title: "Error",
-          message: res.message || "Failed to reset password",
+          message: res.message || "Invalid OTP",
           showCancel: false,
         });
       }
-    } catch (err) {
+    } catch {
+      triggerShake();
       showAlert({
         title: "Error",
-        message:
-          err?.response?.data?.message || err?.message || "Network error",
+        message: "Network error",
         showCancel: false,
       });
     } finally {
       setLoading(false);
     }
+  };
+
+  const resendOTP = async () => {
+    setSeconds(60);
+    setOtp("");
+    await authAPI.forgotPassword(email);
   };
 
   return (
@@ -123,43 +243,51 @@ export default function ResetPasswordScreen() {
           paddingTop: keyboardVisible ? 40 : 0,
         }}
         keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.card}>
           <Text style={styles.title}>Reset Password</Text>
           <Text style={styles.subtitle}>
-            Enter the code from your email and choose a new password.
+            Enter the 6-digit code sent to your email.
           </Text>
 
           <TextInput
             style={styles.input}
             placeholder="Email"
             value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            placeholderTextColor={COLORS.textMuted}
+            editable={false}
           />
 
-          <TextInput
-            style={styles.input}
-            placeholder="OTP Code"
+          <OTPInput
             value={otp}
-            onChangeText={setOtp}
-            keyboardType="number-pad"
-            placeholderTextColor={COLORS.textMuted}
+            onChange={setOtp}
+            onComplete={(val) => {
+              setOtp(val);
+              // focus new password field when OTP complete
+              newPassRef.current?.focus?.();
+            }}
+            shakeAnim={shakeAnim}
           />
+
+          <View style={styles.resendRow}>
+            {seconds > 0 ? (
+              <Text style={styles.resendText}>Resend code in {seconds}s</Text>
+            ) : (
+              <TouchableOpacity onPress={resendOTP}>
+                <Text style={styles.resendLink}>Resend Code</Text>
+              </TouchableOpacity>
+            )}
+          </View>
 
           <View style={{ position: "relative" }}>
             <TextInput
+              ref={newPassRef}
               style={styles.input}
               placeholder="New password"
               value={newPassword}
               onChangeText={setNewPassword}
               secureTextEntry={!showNewPassword}
               autoCapitalize="none"
-              placeholderTextColor={COLORS.textMuted}
             />
             <TouchableOpacity
               onPress={() => setShowNewPassword((s) => !s)}
@@ -181,7 +309,6 @@ export default function ResetPasswordScreen() {
               onChangeText={setConfirmPassword}
               secureTextEntry={!showConfirmPassword}
               autoCapitalize="none"
-              placeholderTextColor={COLORS.textMuted}
             />
             <TouchableOpacity
               onPress={() => setShowConfirmPassword((s) => !s)}
@@ -204,13 +331,6 @@ export default function ResetPasswordScreen() {
               {loading ? "Updating..." : "Reset Password"}
             </Text>
           </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => router.replace("/login")}
-            style={{ marginTop: 12 }}
-          >
-            <Text style={styles.backText}>Back to Login</Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -218,10 +338,7 @@ export default function ResetPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.primary,
-  },
+  container: { flex: 1, backgroundColor: COLORS.primary },
   card: {
     backgroundColor: COLORS.white,
     margin: 24,
@@ -231,7 +348,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "700",
-    marginBottom: 6,
     textAlign: "center",
   },
   subtitle: {
@@ -257,15 +373,38 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  buttonDisabled: {
-    opacity: 0.65,
+  buttonDisabled: { opacity: 0.65 },
+  buttonText: { color: COLORS.white, fontWeight: "700" },
+
+  otpContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 12,
   },
-  buttonText: {
-    color: COLORS.white,
-    fontWeight: "700",
-  },
-  backText: {
-    color: COLORS.primary,
+  otpInput: {
+    width: 46,
+    height: 52,
+    borderRadius: 10,
+    backgroundColor: COLORS.surface,
     textAlign: "center",
+    fontSize: 18,
+    fontWeight: "700",
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  otpInputFilled: {
+    borderColor: COLORS.primary,
+    backgroundColor: "#FFF",
+  },
+  resendRow: {
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  resendText: {
+    color: COLORS.textMuted,
+  },
+  resendLink: {
+    color: COLORS.primary,
+    fontWeight: "700",
   },
 });
