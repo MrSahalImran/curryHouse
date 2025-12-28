@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const API_URL = "http://192.168.29.33:5000/api";
@@ -13,6 +14,7 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
   const [imageFile, setImageFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (initial) {
@@ -122,7 +124,7 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
           {initial ? "Edit" : "Add"} Menu Item
         </h2>
         <button
-          onClick={onBack}
+          onClick={() => (onBack ? onBack() : navigate(-1))}
           className="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-md"
         >
           Back

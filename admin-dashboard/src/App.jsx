@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import AddMenuItem from "./AddMenuItem";
 import ManageMenu from "./ManageMenu";
 import axios from "axios";
@@ -69,6 +70,17 @@ export default function App() {
   const prevCountRef = useRef(0);
   const [page, setPage] = useState("dashboard");
   const [editingItem, setEditingItem] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // keep `page` state in sync with URL so navigation and existing page checks both work
+  useEffect(() => {
+    const path = location.pathname || "/";
+    if (path === "/" || path === "") setPage("dashboard");
+    else if (path.startsWith("/manage-menu")) setPage("manage-menu");
+    else if (path.startsWith("/add-menu")) setPage("add-menu");
+    else if (path.startsWith("/edit-menu")) setPage("edit-menu");
+  }, [location.pathname]);
 
   // Undo state
   const undoTimerRef = useRef(null);
@@ -235,7 +247,7 @@ export default function App() {
               ↻ Refresh
             </button>
             <button
-              onClick={() => setPage("manage-menu")}
+              onClick={() => navigate("/manage-menu")}
               className="px-3 py-2 bg-green-600 text-white rounded-md"
             >
               Manage Menu
@@ -505,19 +517,19 @@ export default function App() {
             </main>
           </>
         ) : page === "add-menu" ? (
-          <AddMenuItem onBack={() => setPage("dashboard")} />
+          <AddMenuItem onBack={() => navigate("/")} />
         ) : page === "manage-menu" ? (
           <ManageMenu
             onEdit={(item) => {
               setEditingItem(item);
-              setPage("edit-menu");
+              navigate("/edit-menu");
             }}
           />
         ) : page === "edit-menu" ? (
           <AddMenuItem
             initial={editingItem}
-            onBack={() => setPage("manage-menu")}
-            onSaved={() => setPage("manage-menu")}
+            onBack={() => navigate("/manage-menu")}
+            onSaved={() => navigate("/manage-menu")}
           />
         ) : null}
 

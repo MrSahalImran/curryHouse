@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const API_URL = "http://192.168.29.33:5000/api";
 
-export default function ManageMenu({ onEdit }) {
+export default function ManageMenu({ onEdit, onBack }) {
   const [items, setItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const fetchItems = async () => {
     setLoading(true);
@@ -89,9 +91,17 @@ export default function ManageMenu({ onEdit }) {
   return (
     <div className="bg-white/95 dark:bg-slate-800/70 p-4 rounded-lg shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold">Manage Menu</h2>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => (onBack ? onBack() : navigate("/"))}
+            className="px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-md"
+          >
+            Back
+          </button>
+          <h2 className="text-lg font-bold">Manage Menu</h2>
+        </div>
         <button
-          onClick={() => onEdit(null)}
+          onClick={() => (onEdit ? onEdit(null) : navigate("/add-menu"))}
           className="px-3 py-1 bg-green-600 text-white rounded-md"
         >
           + New Item
@@ -174,7 +184,9 @@ export default function ManageMenu({ onEdit }) {
 
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => onEdit(it)}
+                    onClick={() =>
+                      onEdit ? onEdit(it) : navigate("/edit-menu")
+                    }
                     className="px-3 py-1 bg-slate-200 dark:bg-slate-600 rounded-md"
                   >
                     Edit
