@@ -52,6 +52,16 @@ const userSchema = new mongoose.Schema(
         ref: "MenuItem",
       },
     ],
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerification: {
+      otpHash: { type: String },
+      expiresAt: { type: Date },
+      attempts: { type: Number, default: 0 },
+      sentAt: { type: Date },
+    },
     createdAt: {
       type: Date,
       default: Date.now,

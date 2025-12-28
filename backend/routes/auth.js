@@ -48,4 +48,10 @@ router.post(
 // @access  Private
 router.get("/me", auth, authController.me);
 
+// Send OTP to email for verification
+router.post("/send-otp", authController.sendOtp);
+
+// Verify OTP
+router.post("/verify-otp", authController.verifyOtp);
+
 module.exports = router;
