@@ -20,7 +20,10 @@ const JAR_COORDS = {
 
 export default function AboutScreen() {
   return (
-    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.card}>
         {/* Logo placeholder - replace source with your logo if available */}
         <View style={styles.logoCircle}>
