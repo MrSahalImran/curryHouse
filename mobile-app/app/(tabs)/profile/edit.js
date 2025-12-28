@@ -59,7 +59,15 @@ export default function EditProfileScreen() {
     >
       <Text style={styles.title}>Edit Profile</Text>
       <View style={styles.avatarSection}>
-        <Image source={{ uri: avatar || user?.avatar }} style={styles.avatar} />
+        <Image
+          source={{
+            uri:
+              avatar ||
+              user?.avatar ||
+              "https://via.placeholder.com/120x120?text=Avatar",
+          }}
+          style={styles.avatar}
+        />
         {/* Avatar upload/change can be added here */}
       </View>
       <Text style={styles.label}>Name *</Text>

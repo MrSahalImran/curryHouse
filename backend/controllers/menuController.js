@@ -2,6 +2,7 @@ const MenuItem = require("../models/MenuItem");
 const Category = require("../models/Category");
 const fs = require("fs");
 const path = require("path");
+const cloudinary = require("../utils/cloudinary");
 
 // Helper to compute a public, reachable image URL for responses
 function publicImageUrl(image, req) {
@@ -104,13 +105,11 @@ exports.createCategory = async (req, res) => {
     return res.status(201).json({ success: true, data: cat });
   } catch (err) {
     console.error("createCategory error", err);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to create category",
-        error: err.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to create category",
+      error: err.message,
+    });
   }
 };
 
@@ -134,13 +133,11 @@ exports.deleteCategory = async (req, res) => {
     });
   } catch (err) {
     console.error("deleteCategory error", err);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to delete category",
-        error: err.message,
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete category",
+      error: err.message,
+    });
   }
 };
 
@@ -204,6 +201,7 @@ exports.createItem = async (req, res) => {
       category,
       tags: tagsArray,
       image: image || undefined,
+      imagePublicId: req.body.imagePublicId || undefined,
     });
 
     await menuItem.save();
@@ -237,6 +235,8 @@ exports.updateItem = async (req, res) => {
     };
 
     if (image !== undefined) update.image = image || undefined;
+    if (req.body.imagePublicId !== undefined)
+      update.imagePublicId = req.body.imagePublicId || undefined;
 
     const item = await MenuItem.findById(id);
     if (!item)
@@ -245,13 +245,26 @@ exports.updateItem = async (req, res) => {
         .json({ success: false, message: "Menu item not found" });
 
     // if replacing image and old image is local, attempt to delete old file
-    if (update.image && item.image && item.image.includes("/uploads/")) {
-      try {
-        const filename = item.image.split("/uploads/").pop();
-        const filePath = path.join(__dirname, "..", "uploads", filename);
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-      } catch (e) {
-        // ignore unlink errors
+    if (update.image) {
+      // if old image was stored locally, remove file
+      if (item.image && item.image.includes("/uploads/")) {
+        try {
+          const filename = item.image.split("/uploads/").pop();
+          const filePath = path.join(__dirname, "..", "uploads", filename);
+          if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        } catch (e) {
+          // ignore unlink errors
+        }
+      }
+
+      // if old image was uploaded to Cloudinary, remove by public id
+      if (item.imagePublicId) {
+        try {
+          await cloudinary.uploader.destroy(item.imagePublicId);
+        } catch (e) {
+          // ignore cloudinary delete errors but log
+          console.error("Cloudinary delete error:", e);
+        }
       }
     }
 
@@ -277,6 +290,7 @@ exports.deleteItem = async (req, res) => {
         .json({ success: false, message: "Menu item not found" });
 
     // attempt to delete local upload
+    // if image is local file, delete it
     if (item.image && item.image.includes("/uploads/")) {
       try {
         const filename = item.image.split("/uploads/").pop();
@@ -284,6 +298,15 @@ exports.deleteItem = async (req, res) => {
         if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
       } catch (e) {
         // ignore
+      }
+    }
+
+    // if image was uploaded to Cloudinary, delete via public id
+    if (item.imagePublicId) {
+      try {
+        await cloudinary.uploader.destroy(item.imagePublicId);
+      } catch (e) {
+        console.error("Cloudinary delete error:", e);
       }
     }
 

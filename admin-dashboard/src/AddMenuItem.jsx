@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const API_URL = "https://curryhouse-dw7s.onrender.com/api";
+const API_URL = "http://192.168.29.33:5000/api";
 
 export default function AddMenuItem({ onBack, initial = null, onSaved }) {
   const [name, setName] = useState("");
@@ -51,8 +51,11 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
     const res = await axios.post(`${API_URL}/uploads`, fd, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    // prefer returned path if available
-    return res.data?.data?.path || res.data?.data?.url;
+    // return both url and public_id (Cloudinary)
+    return {
+      url: res.data?.data?.url || res.data?.data?.path,
+      public_id: res.data?.data?.public_id,
+    };
   };
 
   const handleSubmit = async (e) => {
@@ -61,9 +64,11 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
     setMessage(null);
     try {
       let imageVal = initial?.image || null;
+      let imagePublicId = initial?.imagePublicId || null;
       if (imageFile) {
         const uploaded = await uploadImage();
-        imageVal = uploaded;
+        imageVal = uploaded?.url || imageVal;
+        imagePublicId = uploaded?.public_id || imagePublicId;
       }
 
       const payload = {
@@ -73,6 +78,7 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
         category,
         tags,
         image: imageVal,
+        imagePublicId,
       };
 
       let res;

@@ -4,9 +4,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../config/config";
 
 export default function FavoriteItem({ item, onRemove }) {
+  const uri =
+    item?.image || "https://via.placeholder.com/150x150?text=No+Image";
   return (
     <View style={styles.container}>
-      <Image source={{ uri: item.image }} style={styles.image} />
+      <Image source={{ uri }} style={styles.image} />
       <View style={styles.info}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.description} numberOfLines={2}>

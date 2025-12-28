@@ -25,6 +25,11 @@ const menuItemSchema = new mongoose.Schema(
       type: String,
       default: "https://via.placeholder.com/300x200",
     },
+    // Cloudinary public id (if uploaded to Cloudinary)
+    imagePublicId: {
+      type: String,
+      default: null,
+    },
     tags: [
       {
         type: String,

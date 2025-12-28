@@ -112,7 +112,14 @@ export default function HomeScreen() {
         >
           {popularItems.map((item) => (
             <View key={item._id} style={styles.menuCard}>
-              <Image source={{ uri: item.image }} style={styles.menuImage} />
+              <Image
+                source={{
+                  uri:
+                    item.image ||
+                    "https://via.placeholder.com/300x200?text=No+Image",
+                }}
+                style={styles.menuImage}
+              />
               <View style={styles.menuInfo}>
                 <Text style={styles.menuName} numberOfLines={1}>
                   {item.name}

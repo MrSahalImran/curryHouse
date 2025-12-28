@@ -3,7 +3,7 @@ import AddMenuItem from "./AddMenuItem";
 import ManageMenu from "./ManageMenu";
 import axios from "axios";
 
-const API_URL = "https://curryhouse-dw7s.onrender.com/api";
+const API_URL = "http://192.168.29.33:5000/api";
 
 function getStatusColor(status) {
   switch (status) {

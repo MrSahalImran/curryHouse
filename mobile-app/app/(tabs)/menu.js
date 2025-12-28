@@ -55,13 +55,16 @@ export default function MenuScreen() {
     const isFavorite =
       Array.isArray(favorites) && favorites.some((fav) => fav._id === item._id);
 
+    const uri =
+      item?.image || "https://via.placeholder.com/300x200?text=No+Image";
+
     return (
       <TouchableOpacity
         activeOpacity={0.9}
         onPress={() => setSelected(item)}
         style={styles.menuItem}
       >
-        <Image source={{ uri: item.image }} style={styles.itemImage} />
+        <Image source={{ uri }} style={styles.itemImage} />
         <View style={styles.itemDetails}>
           <View style={styles.itemHeader}>
             <Text
@@ -198,7 +201,14 @@ export default function MenuScreen() {
         <Pressable style={styles.modalOverlay} onPress={closeModal} />
         {selected && (
           <View style={styles.modalContent}>
-            <Image source={{ uri: selected.image }} style={styles.modalImage} />
+            <Image
+              source={{
+                uri:
+                  selected.image ||
+                  "https://via.placeholder.com/600x400?text=No+Image",
+              }}
+              style={styles.modalImage}
+            />
             <View style={styles.modalBody}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>{selected.name}</Text>

@@ -469,7 +469,13 @@ export default function CartScreen() {
 
   const renderCartItem = ({ item }) => (
     <View style={styles.cartItem}>
-      <Image source={{ uri: item.image }} style={styles.itemImage} />
+      <Image
+        source={{
+          uri:
+            item.image || "https://via.placeholder.com/150x100?text=No+Image",
+        }}
+        style={styles.itemImage}
+      />
       <View style={styles.itemDetails}>
         <Text style={styles.itemName}>{item.name}</Text>
         <Text style={styles.itemPrice}>kr {item.price}</Text>
