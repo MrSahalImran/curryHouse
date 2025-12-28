@@ -4,7 +4,7 @@ import AddMenuItem from "./AddMenuItem";
 import ManageMenu from "./ManageMenu";
 import axios from "axios";
 
-const API_URL = "http://192.168.29.33:5000/api";
+const API_URL = import.meta.env.VITE_API_URL;
 
 function getStatusColor(status) {
   switch (status) {
