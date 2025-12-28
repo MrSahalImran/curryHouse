@@ -33,20 +33,21 @@ exports.register = async (req, res) => {
 
     const token = generateToken(user._id);
 
-    // Send OTP on registration (best-effort)
-    try {
-      await sendOtpToUser(user);
-    } catch (e) {
-      console.warn(
-        "Auto-send OTP failed during registration:",
-        e && e.message ? e.message : e
-      );
-    }
+    // Respond to client immediately, then send OTP in background so slow
+    // SMTP or network timeouts don't cause client-side errors.
     res.status(201).json({
       success: true,
       message: "User registered successfully",
       token,
       user: user.toJSON(),
+    });
+
+    // Fire-and-forget OTP send (best-effort). Errors are logged.
+    sendOtpToUser(user).catch((e) => {
+      console.warn(
+        "Auto-send OTP failed during registration (background):",
+        e && e.message ? e.message : e
+      );
     });
   } catch (error) {
     console.error("Register error:", error);

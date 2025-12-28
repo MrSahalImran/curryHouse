@@ -57,12 +57,8 @@ export default function RegisterScreen() {
     });
 
     if (result.success) {
-      Alert.alert("Success", "Account created successfully!", [
-        {
-          text: "OK",
-          onPress: () => router.replace("/(tabs)"),
-        },
-      ]);
+      // Navigate to OTP verification screen after registration
+      router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
     } else {
       Alert.alert("Registration Failed", result.error);
     }

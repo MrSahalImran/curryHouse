@@ -44,6 +44,14 @@ export const authAPI = {
     const response = await api.post("/auth/register", userData);
     return response.data;
   },
+  sendOtp: async (email) => {
+    const response = await api.post("/auth/send-otp", { email });
+    return response.data;
+  },
+  verifyOtp: async ({ email, otp }) => {
+    const response = await api.post("/auth/verify-otp", { email, otp });
+    return response.data;
+  },
   login: async (credentials) => {
     const response = await api.post("/auth/login", credentials);
     return response.data;
@@ -110,6 +118,14 @@ export const userAPI = {
   },
   removeFavorite: async (menuItemId) => {
     const response = await api.delete(`/user/favorites/${menuItemId}`);
+    return response.data;
+  },
+  getNotifications: async () => {
+    const response = await api.get("/user/notifications");
+    return response.data;
+  },
+  markNotificationRead: async (id) => {
+    const response = await api.patch(`/user/notifications/${id}/read`);
     return response.data;
   },
 };

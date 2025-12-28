@@ -32,8 +32,7 @@ const useAuthStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await authAPI.register(userData);
-
-      if (response.success) {
+      if (response && response.success) {
         const { token, user } = response;
 
         // Save to AsyncStorage
@@ -50,9 +49,35 @@ const useAuthStore = create((set, get) => ({
 
         return { success: true };
       }
+
+      // If server responded with success:false, return the server message/errors
+      if (response && response.success === false) {
+        const serverMessage =
+          response.message ||
+          (response.errors && Array.isArray(response.errors)
+            ? response.errors.map((e) => e.msg || e.message).join(", ")
+            : null) ||
+          "Registration failed";
+        set({ isLoading: false, error: serverMessage });
+        return { success: false, error: serverMessage };
+      }
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Registration failed";
+      // Extract helpful error messages from the server or validation
+      let errorMessage = "Registration failed";
+      if (error.response && error.response.data) {
+        const data = error.response.data;
+        if (data.message) errorMessage = data.message;
+        else if (data.errors && Array.isArray(data.errors)) {
+          errorMessage = data.errors
+            .map((e) => e.msg || e.message || JSON.stringify(e))
+            .join(", ");
+        } else if (typeof data === "string") {
+          errorMessage = data;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       set({ isLoading: false, error: errorMessage });
       return { success: false, error: errorMessage };
     }
