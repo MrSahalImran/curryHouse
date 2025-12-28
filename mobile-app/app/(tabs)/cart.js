@@ -9,6 +9,8 @@ import {
   Modal,
   TextInput,
   ScrollView,
+  Pressable,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -51,37 +53,6 @@ const styles = StyleSheet.create({
   listContainer: {
     padding: 16,
   },
-  addressCard: {
-    backgroundColor: COLORS.white,
-    marginHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 8,
-    padding: 12,
-    borderRadius: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  addressCardTitle: {
-    fontSize: 12,
-    color: COLORS.textLight,
-    marginBottom: 4,
-  },
-  addressCardText: {
-    fontSize: 14,
-    color: COLORS.text,
-    fontWeight: "600",
-  },
-  addressCardTextMuted: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-    fontStyle: "italic",
-  },
   changeText: {
     color: COLORS.primary,
     fontWeight: "700",
@@ -89,57 +60,92 @@ const styles = StyleSheet.create({
   cartItem: {
     flexDirection: "row",
     backgroundColor: COLORS.white,
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
+    borderRadius: 16,
+    padding: 0,
+    overflow: "hidden",
+    marginBottom: 14,
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
+
   itemImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
+    width: 90,
+    height: "100%",
+    resizeMode: "cover",
   },
+
   itemDetails: {
     flex: 1,
-    marginLeft: 12,
+    padding: 14, // padding only for text/content
   },
+
   itemName: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "700",
     color: COLORS.text,
-    marginBottom: 4,
+    marginBottom: 2,
   },
+
   itemPrice: {
     fontSize: 14,
     color: COLORS.primary,
-    fontWeight: "bold",
+    fontWeight: "700",
   },
+
   quantityControls: {
     flexDirection: "row",
     alignItems: "center",
-    marginRight: 12,
-  },
-  quantityButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
     backgroundColor: COLORS.surface,
+    borderRadius: 20,
+    paddingHorizontal: 4,
+    paddingVertical: 4,
+    marginRight: 0,
+  },
+
+  spicePill: {
+    marginTop: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+
+  spiceText: {
+    marginHorizontal: 6,
+    color: COLORS.primary,
+    fontWeight: "700",
+    fontSize: 12,
+    flexShrink: 0,
+  },
+
+  quantityButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: COLORS.white,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
+
   quantity: {
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 14,
+    fontWeight: "700",
     color: COLORS.text,
-    marginHorizontal: 12,
-    minWidth: 24,
+    marginHorizontal: 10,
+    minWidth: 10,
     textAlign: "center",
   },
+
   removeButton: {
     padding: 8,
   },
@@ -148,7 +154,13 @@ const styles = StyleSheet.create({
     padding: 16,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 10,
   },
+
   totalContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -169,15 +181,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    padding: 16,
-    borderRadius: 12,
+    paddingVertical: 16,
+    borderRadius: 14,
   },
+
   checkoutButtonText: {
     color: COLORS.white,
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "800",
     marginRight: 8,
   },
+
   defaultBadge: {
     marginTop: 4,
     fontSize: 12,
@@ -192,9 +206,11 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     color: COLORS.textMuted,
-    marginTop: 16,
-    marginBottom: 24,
+    marginTop: 12,
+    marginBottom: 20,
+    fontWeight: "600",
   },
+
   shopButton: {
     backgroundColor: COLORS.primary,
     paddingHorizontal: 32,
@@ -210,21 +226,24 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.45)",
   },
+
   modalContent: {
     backgroundColor: COLORS.white,
     padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: "80%",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: "85%",
   },
+
   modalTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 20,
+    fontSize: 20,
+    fontWeight: "800",
+    marginBottom: 16,
     textAlign: "center",
   },
+
   modalItemRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -249,39 +268,13 @@ const styles = StyleSheet.create({
   notesInput: {
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 8,
-    padding: 12,
-    height: 100,
+    borderRadius: 12,
+    padding: 14,
+    height: 110,
     textAlignVertical: "top",
-    marginBottom: 20,
+    backgroundColor: COLORS.white,
   },
-  addressOption: {
-    padding: 15,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  addressSelected: {
-    borderColor: COLORS.primary,
-    borderWidth: 2,
-    backgroundColor: COLORS.surface,
-  },
-  addressText: {
-    fontSize: 16,
-  },
-  noAddressText: {
-    textAlign: "center",
-    color: COLORS.textMuted,
-    marginVertical: 20,
-  },
-  manageAddressesLink: {
-    color: COLORS.primary,
-    textAlign: "center",
-    marginTop: 6,
-    marginBottom: 16,
-    fontWeight: "700",
-  },
+
   nextBtn: {
     backgroundColor: COLORS.primary,
     padding: 16,
@@ -307,17 +300,20 @@ const styles = StyleSheet.create({
   extrasContainer: {
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 12,
-    padding: 8,
-    marginBottom: 16,
+    borderRadius: 14,
+    padding: 10,
+    marginBottom: 18,
+    backgroundColor: COLORS.surface,
   },
+
   extraRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
+
   extraName: {
     fontSize: 15,
     color: COLORS.text,
@@ -373,6 +369,7 @@ export default function CartScreen() {
     decreaseQuantity,
     clearCart,
   } = useCartStore();
+  const { updateSpiceLevel } = useCartStore();
   const { createOrder } = useOrderStore();
   const { user } = useAuthStore();
 
@@ -382,6 +379,9 @@ export default function CartScreen() {
   const [extraNotes, setExtraNotes] = useState("");
   const [extraSelections, setExtraSelections] = useState({});
   const [authPromptVisible, setAuthPromptVisible] = useState(false);
+  const [spiceModalVisible, setSpiceModalVisible] = useState(false);
+  const [spiceTargetItem, setSpiceTargetItem] = useState(null);
+  const SPICE_LEVELS = ["Mild", "Medium", "Hot", "Extra Hot"];
 
   const extrasTotal = Object.entries(extraSelections).reduce(
     (sum, [id, qty]) => {
@@ -434,6 +434,7 @@ export default function CartScreen() {
         price: item.price,
         quantity: item.quantity,
         subtotal: item.price * item.quantity,
+        spiceLevel: item.spiceLevel || "Medium",
       })),
       totalAmount: totalPrice + extrasTotalPayload,
       // Order type is always pickup
@@ -467,6 +468,22 @@ export default function CartScreen() {
     }
   };
 
+  const openSpiceModal = (item) => {
+    setSpiceTargetItem(item);
+    setSpiceModalVisible(true);
+  };
+
+  const closeSpiceModal = () => {
+    setSpiceTargetItem(null);
+    setSpiceModalVisible(false);
+  };
+
+  const changeSpiceForTarget = (level) => {
+    if (!spiceTargetItem) return;
+    updateSpiceLevel(spiceTargetItem._id, level);
+    closeSpiceModal();
+  };
+
   const renderCartItem = ({ item }) => (
     <View style={styles.cartItem}>
       <Image
@@ -479,6 +496,28 @@ export default function CartScreen() {
       <View style={styles.itemDetails}>
         <Text style={styles.itemName}>{item.name}</Text>
         <Text style={styles.itemPrice}>kr {item.price}</Text>
+        <TouchableOpacity
+          onPress={() => openSpiceModal(item)}
+          accessibilityLabel={`Change spice level for ${item.name}`}
+          activeOpacity={0.8}
+          style={styles.spicePill}
+        >
+          <Ionicons
+            name="flame"
+            size={14}
+            color={COLORS.primary}
+            style={{ width: 14 }}
+          />
+
+          <Text style={styles.spiceText}>{item.spiceLevel || "Medium"}</Text>
+
+          <Ionicons
+            name="chevron-forward"
+            size={14}
+            color={COLORS.primary}
+            style={{ width: 14 }}
+          />
+        </TouchableOpacity>
       </View>
       <View style={styles.quantityControls}>
         <TouchableOpacity
@@ -685,7 +724,7 @@ export default function CartScreen() {
                     style={styles.nextBtn}
                     onPress={() => setStep(3)}
                   >
-                    <Text style={styles.nextBtnText}>Next: Review</Text>
+                    <Text style={styles.nextBtnText}>Next: Review Order</Text>
                   </TouchableOpacity>
                 </>
               )}
@@ -742,6 +781,36 @@ export default function CartScreen() {
           router.push("/login");
         }}
       />
+      {/* Spice selector modal (sibling to order modal) */}
+      <Modal
+        visible={spiceModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={closeSpiceModal}
+      >
+        <Pressable style={styles.modalOverlay} onPress={closeSpiceModal} />
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Choose Spice Level</Text>
+          {SPICE_LEVELS.map((s) => (
+            <TouchableOpacity
+              key={s}
+              style={{
+                paddingVertical: 12,
+                borderBottomWidth: 1,
+                borderBottomColor: COLORS.border,
+              }}
+              onPress={() => changeSpiceForTarget(s)}
+            >
+              <Text style={{ fontSize: 16 }}>{s}</Text>
+            </TouchableOpacity>
+          ))}
+          <TouchableOpacity style={{ marginTop: 12 }} onPress={closeSpiceModal}>
+            <Text style={{ color: COLORS.primary, textAlign: "center" }}>
+              Cancel
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }

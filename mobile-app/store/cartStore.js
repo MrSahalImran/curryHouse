@@ -99,6 +99,23 @@ const useCartStore = create((set, get) => ({
     get().saveCart(newItems);
   },
 
+  // Update spice level for an item in the cart
+  updateSpiceLevel: (itemId, spiceLevel) => {
+    const { items } = get();
+    const newItems = items.map((item) =>
+      item._id === itemId ? { ...item, spiceLevel } : item
+    );
+
+    const totalItems = newItems.reduce((sum, item) => sum + item.quantity, 0);
+    const totalPrice = newItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    set({ items: newItems, totalItems, totalPrice });
+    get().saveCart(newItems);
+  },
+
   // Increase quantity
   increaseQuantity: (itemId) => {
     const { items } = get();
