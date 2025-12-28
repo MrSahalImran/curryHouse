@@ -10,7 +10,20 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
   const [price, setPrice] = useState(0);
   const [category, setCategory] = useState("Biryani");
   const [categories, setCategories] = useState([]);
-  const [tags, setTags] = useState("");
+  // Tags handling: selected tags array and custom tag input
+  const AVAILABLE_TAGS = [
+    "Party",
+    "Lunch",
+    "Dinner",
+    "Coffee",
+    "Breakfast",
+    "Vegetarian",
+    "Vegan",
+    "Spicy",
+    "Chef Special",
+  ];
+  const [tagsArr, setTagsArr] = useState([]);
+  const [newTag, setNewTag] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
@@ -22,7 +35,7 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
       setDescription(initial.description || "");
       setPrice(initial.price || 0);
       setCategory(initial.category || "Biryani");
-      setTags((initial.tags || []).join(", "));
+      setTagsArr(initial.tags || []);
     }
     // fetch categories for select
     const fetchCategories = async () => {
@@ -78,7 +91,7 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
         description,
         price,
         category,
-        tags,
+        tags: Array.isArray(tagsArr) ? tagsArr : [],
         image: imageVal,
         imagePublicId,
       };
@@ -100,7 +113,7 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
           setDescription("");
           setPrice(0);
           setCategory("Biryani");
-          setTags("");
+          setTagsArr([]);
           setImageFile(null);
         }
         if (onSaved) onSaved(res.data.data);
@@ -188,12 +201,56 @@ export default function AddMenuItem({ onBack, initial = null, onSaved }) {
             </select>
           </div>
           <div>
-            <label className="block text-sm font medium">Tags (comma)</label>
-            <input
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-              className="mt-1 w-full p-2 border rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-600 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none"
-            />
+            <label className="block text-sm font medium">Tags</label>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {AVAILABLE_TAGS.map((t) => {
+                const active = tagsArr.includes(t);
+                return (
+                  <button
+                    type="button"
+                    key={t}
+                    onClick={() => {
+                      if (active) setTagsArr(tagsArr.filter((x) => x !== t));
+                      else setTagsArr([...tagsArr, t]);
+                    }}
+                    className={`px-3 py-1 rounded-full text-sm border ${
+                      active
+                        ? "bg-orange-500 text-white border-transparent"
+                        : "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-600"
+                    }`}
+                  >
+                    {t}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-3 flex items-center gap-2">
+              <input
+                placeholder="Add custom tag"
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                className="flex-1 p-2 border rounded-md bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-600 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const t = (newTag || "").trim();
+                  if (!t) return;
+                  if (!tagsArr.includes(t)) setTagsArr([...tagsArr, t]);
+                  setNewTag("");
+                }}
+                className="px-3 py-2 bg-slate-200 rounded-md"
+              >
+                Add
+              </button>
+            </div>
+
+            {tagsArr.length > 0 && (
+              <div className="mt-2 text-sm text-slate-600">
+                Selected: {tagsArr.join(", ")}
+              </div>
+            )}
           </div>
         </div>
 

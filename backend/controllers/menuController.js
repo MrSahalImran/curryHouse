@@ -162,7 +162,10 @@ exports.getItemById = async (req, res) => {
 
 exports.getPopularItems = async (req, res) => {
   try {
-    const popularItems = await MenuItem.find({ isPopular: true }).limit(10);
+    // Return items explicitly marked as popular OR items tagged 'Chef Special'
+    const popularItems = await MenuItem.find({
+      $or: [{ isPopular: true }, { tags: "Chef Special" }],
+    }).limit(10);
     const mapped = popularItems.map((mi) => {
       const obj = mi.toObject ? mi.toObject() : { ...mi };
       obj.image = publicImageUrl(obj.image, req) || obj.image;
