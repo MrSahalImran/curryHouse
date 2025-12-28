@@ -54,4 +54,35 @@ router.post("/send-otp", authController.sendOtp);
 // Verify OTP
 router.post("/verify-otp", authController.verifyOtp);
 
+// @route   POST /api/auth/forgot-password
+// @desc    Send a password reset OTP to the user's email
+// @access  Public
+router.post(
+  "/forgot-password",
+  [
+    body("email")
+      .isEmail()
+      .normalizeEmail()
+      .withMessage("Please enter a valid email"),
+  ],
+  authController.forgotPassword
+);
+
+// @route   POST /api/auth/reset-password
+// @desc    Reset password using OTP (email, otp, newPassword)
+// @access  Public
+router.post(
+  "/reset-password",
+  [
+    body("email")
+      .isEmail()
+      .normalizeEmail()
+      .withMessage("Please enter a valid email"),
+    body("newPassword")
+      .isLength({ min: 6 })
+      .withMessage("Password must be at least 6 characters"),
+  ],
+  authController.resetPassword
+);
+
 module.exports = router;

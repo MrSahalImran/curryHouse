@@ -7,7 +7,7 @@ const OTP_TTL_MINUTES = Number(process.env.OTP_TTL_MINUTES) || 10;
  * Generate OTP for a user, store hashed OTP and expiry, and send email.
  * @param {Document} user Mongoose user document
  */
-async function sendOtpToUser(user) {
+async function sendOtpToUser(user, options = {}) {
   if (!user) throw new Error("User is required");
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -24,11 +24,13 @@ async function sendOtpToUser(user) {
   await user.save();
 
   try {
-    const { subject, html, text } = generateOtpEmail(
+    const genOpts = {
       otp,
-      OTP_TTL_MINUTES,
-      user.name || user.email
-    );
+      ttlMinutes: OTP_TTL_MINUTES,
+      recipientName: user.name || user.email,
+      mode: options.mode || "verify",
+    };
+    const { subject, html, text } = generateOtpEmail(genOpts);
     await sendMail({ to: user.email, subject, text, html });
   } catch (err) {
     const errMsg = err && err.message ? err.message : String(err);
@@ -38,8 +40,14 @@ async function sendOtpToUser(user) {
     try {
       user.notifications = user.notifications || [];
       user.notifications.unshift({
-        title: "Verification email failed",
-        message: `We were unable to send your verification email: ${errMsg}. Tap 'Resend Code' to try again.`,
+        title:
+          options.mode === "reset"
+            ? "Password reset email failed"
+            : "Verification email failed",
+        message:
+          options.mode === "reset"
+            ? `We were unable to send your password reset email: ${errMsg}. Tap 'Resend Code' to try again.`
+            : `We were unable to send your verification email: ${errMsg}. Tap 'Resend Code' to try again.`,
         read: false,
       });
       await user.save();

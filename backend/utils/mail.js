@@ -51,10 +51,24 @@ function generateOtpEmail(otpOrOptions, ttlMinutesArg, recipientName) {
     otp = otpOrOptions;
   }
 
+  // support mode: 'verify' (default) or 'reset' for password reset emails
+  const mode =
+    (otpOrOptions && otpOrOptions.mode) ||
+    (ttlMinutesArg && ttlMinutesArg.mode) ||
+    "verify";
+  const introText =
+    mode === "reset"
+      ? "Use the following code to reset your password."
+      : "Use the following code to verify your email address.";
+  const outroText =
+    mode === "reset"
+      ? "If you did not request a password reset, please ignore this email or contact support."
+      : "If you did not request this code, you can safely ignore this email.";
+
   const email = {
     body: {
       name: recipientName || "Customer",
-      intro: "Use the following code to verify your email address.",
+      intro: introText,
       // OTP shown as centered bold button via Mailgen action
       action: [
         {
@@ -67,8 +81,7 @@ function generateOtpEmail(otpOrOptions, ttlMinutesArg, recipientName) {
           ],
         },
       ],
-      outro:
-        "If you did not request this code, you can safely ignore this email.",
+      outro: outroText,
     },
   };
 
@@ -83,8 +96,11 @@ function generateOtpEmail(otpOrOptions, ttlMinutesArg, recipientName) {
   const htmlStyled = html.replace(otpRegex, styledSpan);
 
   const text = `${otpStr}\n\n${mailGenerator.generatePlaintext(email)}`;
-  const subject =
+  const defaultVerifySubj =
     process.env.MAIL_OTP_SUBJECT || "Your Curry House verification code";
+  const defaultResetSubj =
+    process.env.MAIL_OTP_RESET_SUBJECT || "Curry House password reset code";
+  const subject = mode === "reset" ? defaultResetSubj : defaultVerifySubj;
   return { subject, html: htmlStyled, text };
 }
 
