@@ -11,7 +11,9 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-// POST /api/uploads - accepts a single file in field 'image'
+// @route   POST /api/uploads
+// @desc    Upload an image (accepts a single file in field 'image') and store it in Cloudinary
+// @access  Private
 router.post("/", upload.single("image"), uploadImage);
 
 module.exports = router;
