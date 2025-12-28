@@ -108,7 +108,7 @@ export default function HomeScreen() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 8 }}
+          contentContainerStyle={{ paddingBottom: 8, paddingRight: 16 }}
         >
           {popularItems.map((item) => (
             <View key={item._id} style={styles.menuCard}>
