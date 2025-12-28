@@ -56,6 +56,7 @@ export default function EditProfileScreen() {
     <ScrollView
       contentContainerStyle={styles.container}
       keyboardShouldPersistTaps="handled"
+    showsVerticalScrollIndicator={false}
     >
       <Text style={styles.title}>Edit Profile</Text>
       <View style={styles.avatarSection}>

@@ -154,6 +154,7 @@ export default function NotificationsScreen() {
         onRefresh={onRefresh}
         ListEmptyComponent={<Text style={styles.empty}>No notifications</Text>}
         contentContainerStyle={{ padding: 16 }}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );

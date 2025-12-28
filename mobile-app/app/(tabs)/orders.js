@@ -193,6 +193,7 @@ export default function OrdersScreen() {
         contentContainerStyle={styles.listContainer}
         refreshing={isLoading}
         onRefresh={fetchOrders}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );

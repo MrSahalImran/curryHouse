@@ -566,6 +566,7 @@ export default function CartScreen() {
         renderItem={renderCartItem}
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={false}
       />
 
       <View style={styles.footer}>
@@ -594,7 +595,7 @@ export default function CartScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <ScrollView>
+            <ScrollView showsVerticalScrollIndicator={false}>
               {step === 1 && (
                 <>
                   <Text style={styles.modalTitle}>Order Summary</Text>

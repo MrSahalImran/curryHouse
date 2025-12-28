@@ -48,6 +48,7 @@ export default function FavoritesScreen() {
           <FavoriteItem item={item} onRemove={() => handleRemove(item._id)} />
         )}
         contentContainerStyle={{ padding: 16 }}
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           !loading && <Text style={styles.empty}>No favorites yet.</Text>
         }
