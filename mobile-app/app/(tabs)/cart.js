@@ -20,6 +20,7 @@ import useAuthStore from "../../store/authStore";
 import AuthPromptModal from "../../components/AuthPromptModal";
 import useUIStore from "../../store/uiStore";
 import { useState, useEffect } from "react";
+import { authAPI } from "../../services/api";
 
 // Optional extras catalog (static for now)
 const EXTRAS_OPTIONS = [
@@ -408,7 +409,33 @@ export default function CartScreen() {
       setAuthPromptVisible(true);
       return;
     }
-    // start fresh extras for each new checkout
+    // require verified users to proceed
+    if (user && !user.isEmailVerified) {
+      showAlert({
+        title: "Verify Account",
+        message:
+          "Please verify your email before placing an order. Go to your profile to verify.",
+        confirmText: "Verify Email",
+        cancelText: "Cancel",
+        showCancel: true,
+        onConfirm: async () => {
+          try {
+            await authAPI.sendOtp(user.email);
+          } catch (err) {
+            showAlert({
+              title: "Error",
+              message:
+                err?.response?.data?.message ||
+                "Failed to send verification code. Please try again.",
+              showCancel: false,
+            });
+          } finally {
+            router.push("/verify-otp");
+          }
+        },
+      });
+      return;
+    }
     setExtraSelections({});
     setModalVisible(true);
     setStep(1);
@@ -417,6 +444,33 @@ export default function CartScreen() {
   const handlePlaceOrder = async () => {
     if (!user) {
       setAuthPromptVisible(true);
+      return;
+    }
+    if (user && !user.isEmailVerified) {
+      setModalVisible(false);
+      showAlert({
+        title: "Verify Account",
+        message:
+          "Your account must be verified before placing orders. Please verify your email.",
+        confirmText: "Verify Email",
+        cancelText: "Cancel",
+        showCancel: true,
+        onConfirm: async () => {
+          try {
+            await authAPI.sendOtp(user.email);
+          } catch (err) {
+            showAlert({
+              title: "Error",
+              message:
+                err?.response?.data?.message ||
+                "Failed to send verification code. Please try again.",
+              showCancel: false,
+            });
+          } finally {
+            router.push("/verify-otp");
+          }
+        },
+      });
       return;
     }
     // No address required; proceed

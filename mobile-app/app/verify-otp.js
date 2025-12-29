@@ -22,6 +22,7 @@ export default function VerifyOtpScreen() {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
+  const [seconds, setSeconds] = useState(60);
   const showAlert = useUIStore((s) => s.showAlert);
 
   useEffect(() => {
@@ -32,9 +33,15 @@ export default function VerifyOtpScreen() {
   }, [email]);
 
   const handleResend = async () => {
+    if (seconds > 0) return; // cooldown active
     setResending(true);
     try {
-      await authAPI.sendOtp(email);
+      const res = await authAPI.sendOtp(email);
+      if (res && res.success === false) {
+        throw new Error(res.message || "Failed to send OTP");
+      }
+      // start cooldown
+      setSeconds(60);
       showAlert({
         title: "OTP Sent",
         message: `OTP has been sent to ${email}`,
@@ -43,13 +50,20 @@ export default function VerifyOtpScreen() {
     } catch (err) {
       showAlert({
         title: "Error",
-        message: err?.response?.data?.message || "Failed to send OTP",
+        message:
+          err?.response?.data?.message || err?.message || "Failed to send OTP",
         showCancel: false,
       });
     } finally {
       setResending(false);
     }
   };
+
+  useEffect(() => {
+    if (seconds === 0) return;
+    const timer = setTimeout(() => setSeconds((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [seconds]);
 
   const handleVerify = async () => {
     if (!otp || otp.trim().length === 0) {
