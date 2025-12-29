@@ -12,6 +12,12 @@ import useAuthStore from "../../../store/authStore";
 import AuthPromptModal from "../../../components/AuthPromptModal";
 import { useState } from "react";
 
+function NotificationDot({ show }) {
+  if (!show) return null;
+
+  return <View style={styles.notifyDot} />;
+}
+
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
@@ -85,11 +91,14 @@ export default function ProfileScreen() {
           onPress={() => requireAuth("/profile/notifications")}
         >
           <View style={styles.menuItemLeft}>
-            <Ionicons
-              name="notifications-outline"
-              size={24}
-              color={COLORS.primary}
-            />
+            <View style={styles.iconWithDot}>
+              <Ionicons
+                name="notifications-outline"
+                size={24}
+                color={COLORS.primary}
+              />
+              <NotificationDot show={user && user.isEmailVerified === false} />
+            </View>
             <Text style={styles.menuItemText}>Notifications</Text>
           </View>
           <Ionicons name="chevron-forward" size={24} color={COLORS.textMuted} />
@@ -316,5 +325,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.textMuted,
     marginVertical: 24,
+  },
+  iconWithDot: {
+    position: "relative",
+    width: 28,
+    height: 28,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  notifyDot: {
+    position: "absolute",
+    right: -2,
+    top: -2,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.error,
+    borderWidth: 1,
+    borderColor: COLORS.white,
   },
 });

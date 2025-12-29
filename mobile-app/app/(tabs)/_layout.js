@@ -2,6 +2,7 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../../config/config";
 import useCartStore from "../../store/cartStore";
+import useAuthStore from "../../store/authStore";
 import { View, Text, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -15,8 +16,15 @@ function TabBarBadge({ count }) {
   );
 }
 
+function ProfileVerifyBadge({ show }) {
+  if (!show) return null;
+
+  return <View style={styles.verifyDot} />;
+}
+
 export default function TabLayout() {
   const { totalItems } = useCartStore();
+  const { user } = useAuthStore();
   const insets = useSafeAreaInsets();
 
   return (
@@ -96,7 +104,12 @@ export default function TabLayout() {
         options={{
           title: "Profile",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+            <View>
+              <Ionicons name="person" size={size} color={color} />
+              <ProfileVerifyBadge
+                show={user && user.isEmailVerified === false}
+              />
+            </View>
           ),
           // Hide the tab header so the nested Profile stack header is used
           headerShown: false,
@@ -123,5 +136,16 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 10,
     fontWeight: "bold",
+  },
+  verifyDot: {
+    position: "absolute",
+    right: -6,
+    top: -4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.error,
+    borderWidth: 1,
+    borderColor: COLORS.white,
   },
 });
