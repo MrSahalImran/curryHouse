@@ -28,18 +28,6 @@ router.delete("/favorites/:menuItemId", auth, userController.removeFavorite);
 // @access  Private
 router.get("/favorites", auth, userController.getFavorites);
 
-// @route   GET /api/user/notifications
-// @desc    Get user notifications
-// @access  Private
-router.get("/notifications", auth, userController.getNotifications);
-
-// @route   PATCH /api/user/notifications/:id/read
-// @desc    Mark notification as read
-// @access  Private
-router.patch(
-  "/notifications/:id/read",
-  auth,
-  userController.markNotificationRead
-);
+// Notifications endpoints removed (feature disabled)
 
 module.exports = router;

@@ -62,14 +62,7 @@ const userSchema = new mongoose.Schema(
       attempts: { type: Number, default: 0 },
       sentAt: { type: Date },
     },
-    notifications: [
-      {
-        title: { type: String },
-        message: { type: String },
-        read: { type: Boolean, default: false },
-        createdAt: { type: Date, default: Date.now },
-      },
-    ],
+    // notifications removed
     createdAt: {
       type: Date,
       default: Date.now,

@@ -35,31 +35,7 @@ async function sendOtpToUser(user, options = {}) {
   } catch (err) {
     const errMsg = err && err.message ? err.message : String(err);
     console.warn("Failed to send verification email (helper):", errMsg);
-
-    // Add a notification to the user so they see the failure in-app
-    try {
-      user.notifications = user.notifications || [];
-      user.notifications.unshift({
-        title:
-          options.mode === "reset"
-            ? "Password reset email failed"
-            : "Verification email failed",
-        message:
-          options.mode === "reset"
-            ? `We were unable to send your password reset email: ${errMsg}. Tap 'Resend Code' to try again.`
-            : `We were unable to send your verification email: ${errMsg}. Tap 'Resend Code' to try again.`,
-        read: false,
-      });
-      await user.save();
-      console.info(
-        `Notification saved for ${user.email}, total notifications: ${user.notifications.length}`
-      );
-    } catch (nerr) {
-      console.warn(
-        "Failed to save notification on user:",
-        nerr && nerr.message ? nerr.message : nerr
-      );
-    }
+    // Notifications feature removed — no persistence of notification errors.
   }
 
   // Dev helper: log OTP to console when not in production so developers can test.

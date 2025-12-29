@@ -1,14 +1,7 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
+import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { COLORS } from "../../../config/config";
-import { userAPI, authAPI } from "../../../services/api";
+import { authAPI } from "../../../services/api";
 import useAuthStore from "../../../store/authStore";
 import { useRouter } from "expo-router";
 import useUIStore from "../../../store/uiStore";
@@ -16,39 +9,7 @@ import useUIStore from "../../../store/uiStore";
 export default function NotificationsScreen() {
   const router = useRouter();
   const currentUser = useAuthStore((s) => s.user);
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [resending, setResending] = useState(false);
   const showAlert = useUIStore((s) => s.showAlert);
-
-  const load = async () => {
-    setLoading(true);
-    try {
-      const res = await userAPI.getNotifications();
-      if (res.success) setNotifications(res.data || []);
-    } catch (err) {
-      console.warn("Failed to load notifications:", err?.message || err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
-
-  useEffect(() => {
-    if (currentUser?.isEmailVerified) {
-      load();
-    }
-  }, [currentUser?.isEmailVerified]);
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await load();
-    setRefreshing(false);
-  };
 
   const handleCardResend = async () => {
     if (!currentUser?.email) {
@@ -59,7 +20,6 @@ export default function NotificationsScreen() {
       });
       return;
     }
-    setResending(true);
     try {
       await authAPI.sendOtp(currentUser.email);
       showAlert({
@@ -73,8 +33,6 @@ export default function NotificationsScreen() {
         message: err?.response?.data?.message || "Failed to send OTP",
         showCancel: false,
       });
-    } finally {
-      setResending(false);
     }
   };
 
@@ -87,7 +45,6 @@ export default function NotificationsScreen() {
       });
       return;
     }
-    setResending(true);
     try {
       await authAPI.sendOtp(currentUser.email);
     } catch (err) {
@@ -97,42 +54,10 @@ export default function NotificationsScreen() {
         showCancel: false,
       });
     } finally {
-      setResending(false);
       const email = currentUser?.email || "";
       router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
     }
   };
-
-  const markRead = async (id) => {
-    try {
-      await userAPI.markNotificationRead(id);
-      setNotifications((prev) =>
-        prev.map((n) => (n._id === id ? { ...n, read: true } : n))
-      );
-    } catch (err) {
-      console.warn("Failed to mark read", err?.message || err);
-    }
-  };
-
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      onPress={() => markRead(item._id)}
-      style={[styles.item, item.read ? styles.read : null]}
-    >
-      <Text style={styles.itemTitle}>{item.title}</Text>
-      <Text style={styles.itemMessage}>{item.message}</Text>
-      <Text style={styles.itemTime}>
-        {new Date(item.createdAt).toLocaleString()}
-      </Text>
-    </TouchableOpacity>
-  );
-
-  if (loading)
-    return (
-      <View style={styles.containerCentered}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-      </View>
-    );
 
   return (
     <View style={styles.container}>
@@ -153,30 +78,14 @@ export default function NotificationsScreen() {
             <TouchableOpacity
               style={styles.verifyBtnSecondary}
               onPress={handleCardResend}
-              disabled={resending}
             >
-              <Text style={styles.verifyBtnTextSecondary}>
-                {resending ? "Resending..." : "Resend code"}
-              </Text>
+              <Text style={styles.verifyBtnTextSecondary}>Resend code</Text>
             </TouchableOpacity>
           </View>
         </View>
       ) : null}
 
-      <Text style={styles.unread}>
-        {notifications.filter((n) => !n.read).length} unread
-      </Text>
-
-      <FlatList
-        data={notifications}
-        keyExtractor={(item) => item._id}
-        renderItem={renderItem}
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-        ListEmptyComponent={<Text style={styles.empty}>No notifications</Text>}
-        contentContainerStyle={{ padding: 16 }}
-        showsVerticalScrollIndicator={false}
-      />
+      <Text style={styles.unread}>{0} unread</Text>
     </View>
   );
 }

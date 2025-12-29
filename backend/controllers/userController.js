@@ -87,40 +87,6 @@ exports.getFavorites = async (req, res) => {
 };
 
 // Get user notifications
-exports.getNotifications = async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id).select("notifications");
-    res.json({ success: true, data: user.notifications || [] });
-  } catch (error) {
-    console.error("Get notifications error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error while fetching notifications",
-    });
-  }
-};
+// Notifications feature removed from backend.
 
-// Mark a notification as read
-exports.markNotificationRead = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const user = await User.findById(req.user._id);
-    if (!user)
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-
-    const notif = user.notifications.id(id);
-    if (!notif)
-      return res
-        .status(404)
-        .json({ success: false, message: "Notification not found" });
-
-    notif.read = true;
-    await user.save();
-    res.json({ success: true, message: "Notification marked read" });
-  } catch (error) {
-    console.error("Mark notification read error:", error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-};
+// Notifications removed

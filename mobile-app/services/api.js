@@ -132,14 +132,7 @@ export const userAPI = {
     const response = await api.delete(`/user/favorites/${menuItemId}`);
     return response.data;
   },
-  getNotifications: async () => {
-    const response = await api.get("/user/notifications");
-    return response.data;
-  },
-  markNotificationRead: async (id) => {
-    const response = await api.patch(`/user/notifications/${id}/read`);
-    return response.data;
-  },
+  // notifications endpoints removed
 };
 
 export default api;
