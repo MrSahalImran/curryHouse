@@ -372,6 +372,17 @@ export default function App() {
                           <div className="text-base font-semibold truncate">
                             {order.user?.name || "Customer"}
                           </div>
+                          <div className="mt-1">
+                            <div className="text-xs text-slate-500 dark:text-slate-400">
+                              Phone:
+                            </div>
+                            <div className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                              {order.user?.phone ||
+                                order.user?.phoneNumber ||
+                                order.user?.mobile ||
+                                ""}
+                            </div>
+                          </div>
                           <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                             {new Date(order.createdAt).toLocaleString()}
                           </div>
