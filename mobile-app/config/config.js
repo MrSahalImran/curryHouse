@@ -2,7 +2,9 @@
 // Prefer EXPO_PUBLIC_API_URL so you can switch between local/remote backends without editing code.
 // For local dev on emulator use: http://10.0.2.2:5000/api
 // For local dev on device use: http://<your-LAN-IP>:5000/api
-export const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+import Constants from "expo-constants";
+const { API_URL } = Constants.expoConfig?.extra || {};
 
 const config = {
   API_URL,
@@ -56,8 +58,8 @@ export const RESTAURANT_INFO = {
 
 // Color Theme (based on Curry House Jar website)
 export const COLORS = {
-  primary: "#FF6B35", // Orange (main brand color)
-  secondary: "#F7931E", // Light orange
+  primary: "#950908", // Orange (main brand color)
+  secondary: "#C11A1A", // Light orange
   accent: "#C1272D", // Red accent
   background: "#FFFFFF", // White
   surface: "#F5F5F5", // Light gray

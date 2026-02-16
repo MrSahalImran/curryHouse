@@ -87,13 +87,13 @@ export default function HomeScreen() {
       <View style={styles.features}>
         <View style={styles.featureCard}>
           <Ionicons name="flash" size={32} color={COLORS.primary} />
-          <Text style={styles.featureTitle}>Express Delivery</Text>
+          <Text style={styles.featureTitle}>Fresh & Fast</Text>
           <Text style={styles.featureText}>Fast & Hot</Text>
         </View>
         <View style={styles.featureCard}>
           <Ionicons name="bag-check" size={32} color={COLORS.primary} />
           <Text style={styles.featureTitle}>Takeaway</Text>
-          <Text style={styles.featureText}>Pick up available</Text>
+          <Text style={styles.featureText}>Pick up at Store</Text>
         </View>
         <View style={styles.featureCard}>
           <Ionicons name="pricetag" size={32} color={COLORS.primary} />

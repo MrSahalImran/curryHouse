@@ -35,8 +35,8 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: COLORS.white,
           borderTopColor: COLORS.border,
-          height: 60 + insets.bottom,
-          paddingBottom: insets.bottom,
+          height: 60 + insets.bottom + 4,
+          paddingBottom: insets.bottom + 4,
           paddingTop: 8,
         },
         tabBarLabelStyle: {
