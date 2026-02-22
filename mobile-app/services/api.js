@@ -29,8 +29,14 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
-      // Token expired or invalid
+    const status = error.response?.status;
+    const hadAuthHeader = Boolean(
+      error.config?.headers?.Authorization ||
+        error.config?.headers?.authorization
+    );
+
+    if (status === 401 && hadAuthHeader) {
+      // Token expired/invalid for an authenticated request
       await AsyncStorage.removeItem("userToken");
       await AsyncStorage.removeItem("userData");
     }

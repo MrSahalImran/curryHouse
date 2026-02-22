@@ -45,11 +45,11 @@ const useOrderStore = create((set, get) => ({
         });
       }
     } catch (error) {
-      console.error("Fetch orders error:", error);
       if (error.response?.status === 401) {
         set({ isLoading: false, orders: [], error: null });
         return { success: false, unauthorized: true };
       }
+      console.error("Fetch orders error:", error);
       set({
         isLoading: false,
         error: error.response?.data?.message || "Failed to fetch orders",
