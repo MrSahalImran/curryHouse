@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -44,11 +44,26 @@ export default function MenuScreen() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selected, setSelected] = useState(null);
+  const categoriesScrollRef = useRef(null);
+  const categoriesScrollXRef = useRef(0);
+
+  const restoreCategoriesScroll = () => {
+    requestAnimationFrame(() => {
+      categoriesScrollRef.current?.scrollTo({
+        x: categoriesScrollXRef.current,
+        animated: false,
+      });
+    });
+  };
 
   useEffect(() => {
     fetchMenuItems();
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    restoreCategoriesScroll();
+  }, [selectedCategory]);
 
   const filteredItems = menuItems.filter((item) => {
     const matchesCategory =
@@ -87,10 +102,15 @@ export default function MenuScreen() {
 
         {/* Categories */}
         <ScrollView
+          ref={categoriesScrollRef}
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.categoriesContent}
           style={styles.categoriesContainer}
+          onScroll={(e) => {
+            categoriesScrollXRef.current = e.nativeEvent.contentOffset.x;
+          }}
+          scrollEventThrottle={16}
         >
           {categories.map((category) => (
             <TouchableOpacity
@@ -99,7 +119,10 @@ export default function MenuScreen() {
                 styles.categoryButton,
                 selectedCategory === category && styles.categoryButtonActive,
               ]}
-              onPress={() => setSelectedCategory(category)}
+              onPress={() => {
+                setSelectedCategory(category);
+                restoreCategoriesScroll();
+              }}
             >
               <Text
                 style={[
