@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RESTAURANT_INFO } from "../../config/config";
 import useMenuStore from "../../store/menuStore";
 import useCartStore from "../../store/cartStore";
+import { normalizeImageUrl } from "../../utils/imageUrl";
 
 const { width } = Dimensions.get("window");
 
@@ -140,8 +141,10 @@ function MenuCard({ item }) {
     <View style={styles.menuCard}>
       <Image
         source={{
-          uri:
-            item.image || "https://via.placeholder.com/300x200?text=No+Image",
+          uri: normalizeImageUrl(
+            item.image,
+            "https://via.placeholder.com/300x200?text=No+Image",
+          ),
         }}
         style={styles.menuImage}
       />

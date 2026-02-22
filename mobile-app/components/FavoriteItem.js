@@ -2,10 +2,13 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../config/config";
+import { normalizeImageUrl } from "../utils/imageUrl";
 
 export default function FavoriteItem({ item, onRemove }) {
-  const uri =
-    item?.image || "https://via.placeholder.com/150x150?text=No+Image";
+  const uri = normalizeImageUrl(
+    item?.image,
+    "https://via.placeholder.com/150x150?text=No+Image",
+  );
   return (
     <View style={styles.container}>
       <Image source={{ uri }} style={styles.image} />

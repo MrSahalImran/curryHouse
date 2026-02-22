@@ -22,6 +22,7 @@ import AuthPromptModal from "../../components/AuthPromptModal";
 import useUIStore from "../../store/uiStore";
 import { useState, useEffect } from "react";
 import { authAPI } from "../../services/api";
+import { normalizeImageUrl } from "../../utils/imageUrl";
 
 // Optional extras catalog (static for now)
 const EXTRAS_OPTIONS = [
@@ -566,8 +567,10 @@ export default function CartScreen() {
     <View style={styles.cartItem}>
       <Image
         source={{
-          uri:
-            item.image || "https://via.placeholder.com/150x100?text=No+Image",
+          uri: normalizeImageUrl(
+            item.image,
+            "https://via.placeholder.com/150x100?text=No+Image",
+          ),
         }}
         style={styles.itemImage}
       />

@@ -16,6 +16,7 @@ import { COLORS } from "../../config/config";
 import useMenuStore from "../../store/menuStore";
 import useCartStore from "../../store/cartStore";
 import useFavoritesStore from "../../store/favoritesStore";
+import { normalizeImageUrl } from "../../utils/imageUrl";
 
 const truncateText = (value, maxLength) => {
   if (!value) return "";
@@ -145,7 +146,7 @@ export default function MenuScreen() {
   const renderMenuItem = ({ item }) => {
     const quantity = getItemQuantity(item._id);
     const isFavorite = favorites.some((f) => f._id === item._id);
-    const uri = item.image || "https://via.placeholder.com/300x200";
+    const uri = normalizeImageUrl(item.image, "https://via.placeholder.com/300x200");
     // Spice level color mapping
     const spice = (item.spiceLevel || "Medium").toString();
     const SPICE_COLORS = {
@@ -258,7 +259,10 @@ export default function MenuScreen() {
           <View style={styles.modalContent}>
             <Image
               source={{
-                uri: selected.image || "https://via.placeholder.com/600x400",
+                uri: normalizeImageUrl(
+                  selected.image,
+                  "https://via.placeholder.com/600x400",
+                ),
               }}
               style={styles.modalImage}
             />
