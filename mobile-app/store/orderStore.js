@@ -5,11 +5,16 @@ const useOrderStore = create((set, get) => ({
   orders: [],
   currentOrder: null,
   isLoading: false,
+  isCreatingOrder: false,
   error: null,
 
   // Create new order
   createOrder: async (orderData) => {
-    set({ isLoading: true, error: null });
+    if (get().isCreatingOrder) {
+      return { success: false, error: "Order is already being placed" };
+    }
+
+    set({ isLoading: true, isCreatingOrder: true, error: null });
     try {
       const response = await ordersAPI.create(orderData);
 
@@ -17,6 +22,7 @@ const useOrderStore = create((set, get) => ({
         set({
           currentOrder: response.data,
           isLoading: false,
+          isCreatingOrder: false,
         });
 
         // Refresh orders list
@@ -27,7 +33,7 @@ const useOrderStore = create((set, get) => ({
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Failed to create order";
-      set({ isLoading: false, error: errorMessage });
+      set({ isLoading: false, isCreatingOrder: false, error: errorMessage });
       return { success: false, error: errorMessage };
     }
   },

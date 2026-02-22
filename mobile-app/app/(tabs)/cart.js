@@ -10,6 +10,7 @@ import {
   ScrollView,
   Pressable,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -357,6 +358,11 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     marginTop: 4,
   },
+  loadingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 });
 
 export default function CartScreen() {
@@ -382,6 +388,7 @@ export default function CartScreen() {
   const [authPromptVisible, setAuthPromptVisible] = useState(false);
   const [spiceModalVisible, setSpiceModalVisible] = useState(false);
   const [spiceTargetItem, setSpiceTargetItem] = useState(null);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const SPICE_LEVELS = ["Mild", "Medium", "Hot", "Extra Hot"];
   // use global UI store for alerts so they show immediately from any screen
   const showAlert = useUIStore((s) => s.showAlert);
@@ -442,6 +449,8 @@ export default function CartScreen() {
   };
 
   const handlePlaceOrder = async () => {
+    if (isPlacingOrder) return;
+
     if (!user) {
       setAuthPromptVisible(true);
       return;
@@ -505,30 +514,35 @@ export default function CartScreen() {
       extras: extrasPicked,
       extrasTotal: extrasTotalPayload,
     };
-    const result = await createOrder(orderData);
-    setModalVisible(false);
-    if (result.success) {
-      clearCart();
-      // reset extras so next order starts from 0
-      setExtraSelections({});
-      showAlert({
-        title: "Order Placed!",
-        message: `Your order #${result.order.orderNumber} has been placed successfully!`,
-        confirmText: "View Order",
-        cancelText: "OK",
-        showCancel: true,
-        onConfirm: () => router.push("/orders"),
-        onCancel: () => {},
-      });
-    } else {
-      // keep selections in case user wants to retry, but ensure modal is closed
-      showAlert({
-        title: "Error",
-        message: result.error || "Failed to place order",
-        confirmText: "OK",
-        showCancel: false,
-        onConfirm: () => {},
-      });
+    setIsPlacingOrder(true);
+    try {
+      const result = await createOrder(orderData);
+      setModalVisible(false);
+      if (result.success) {
+        clearCart();
+        // reset extras so next order starts from 0
+        setExtraSelections({});
+        showAlert({
+          title: "Order Placed!",
+          message: `Your order #${result.order.orderNumber} has been placed successfully!`,
+          confirmText: "View Order",
+          cancelText: "OK",
+          showCancel: true,
+          onConfirm: () => router.push("/orders"),
+          onCancel: () => {},
+        });
+      } else {
+        // keep selections in case user wants to retry, but ensure modal is closed
+        showAlert({
+          title: "Error",
+          message: result.error || "Failed to place order",
+          confirmText: "OK",
+          showCancel: false,
+          onConfirm: () => {},
+        });
+      }
+    } finally {
+      setIsPlacingOrder(false);
     }
   };
 
@@ -816,13 +830,24 @@ export default function CartScreen() {
                   <TouchableOpacity
                     style={styles.nextBtn}
                     onPress={handlePlaceOrder}
+                    disabled={isPlacingOrder}
                   >
-                    <Text style={styles.nextBtnText}>Place Order</Text>
+                    {isPlacingOrder ? (
+                      <View style={styles.loadingRow}>
+                        <ActivityIndicator color={COLORS.white} size="small" />
+                        <Text style={[styles.nextBtnText, { marginLeft: 8 }]}>
+                          Placing Order...
+                        </Text>
+                      </View>
+                    ) : (
+                      <Text style={styles.nextBtnText}>Place Order</Text>
+                    )}
                   </TouchableOpacity>
                 </>
               )}
               <TouchableOpacity
                 style={styles.cancelBtn}
+                disabled={isPlacingOrder}
                 onPress={() => {
                   setModalVisible(false);
                   setExtraSelections({});
