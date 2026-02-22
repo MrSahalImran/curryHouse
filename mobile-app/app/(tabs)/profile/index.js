@@ -201,12 +201,7 @@ export default function ProfileScreen() {
             router.replace("/login");
             return;
           }
-          if (pendingRoute) {
-            const route = pendingRoute;
-            setPendingRoute(null);
-            router.push(route);
-            return;
-          }
+          setPendingRoute(null);
           router.push("/login");
         }}
       />
