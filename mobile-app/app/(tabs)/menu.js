@@ -17,6 +17,12 @@ import useMenuStore from "../../store/menuStore";
 import useCartStore from "../../store/cartStore";
 import useFavoritesStore from "../../store/favoritesStore";
 
+const truncateText = (value, maxLength) => {
+  if (!value) return "";
+  if (value.length <= maxLength) return value;
+  return `${value.slice(0, maxLength).trim()}...`;
+};
+
 export default function MenuScreen() {
   const {
     menuItems,
@@ -108,7 +114,7 @@ export default function MenuScreen() {
         </ScrollView>
       </View>
     ),
-    [searchQuery, selectedCategory, categories]
+    [searchQuery, selectedCategory, categories],
   );
 
   /* ---------------- MENU ITEM ---------------- */
@@ -138,7 +144,7 @@ export default function MenuScreen() {
         <View style={styles.itemDetails}>
           <View style={styles.itemHeader}>
             <Text style={styles.itemName} numberOfLines={1}>
-              {item.name}
+              {truncateText(item.name, 20)}
             </Text>
             <TouchableOpacity
               onPress={() =>
@@ -155,7 +161,7 @@ export default function MenuScreen() {
           </View>
 
           <Text style={styles.itemDescription} numberOfLines={1}>
-            {item.description}
+            {truncateText(item.description, 42)}
           </Text>
 
           <View style={styles.itemMeta}>
