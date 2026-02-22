@@ -143,21 +143,6 @@ export default function ProfileScreen() {
 
         <TouchableOpacity
           style={styles.menuItem}
-          onPress={() => router.push("/profile/terms")}
-        >
-          <View style={styles.menuItemLeft}>
-            <Ionicons
-              name="document-text-outline"
-              size={24}
-              color={COLORS.primary}
-            />
-            <Text style={styles.menuItemText}>Terms & Conditions</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={24} color={COLORS.textMuted} />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.menuItem}
           onPress={() => router.push("/profile/privacy")}
         >
           <View style={styles.menuItemLeft}>

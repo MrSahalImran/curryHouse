@@ -15,7 +15,6 @@ export default function ProfileStackLayout() {
       <Stack.Screen name="favorites" options={{ title: "Favorites" }} />
       <Stack.Screen name="notifications" options={{ title: "Notifications" }} />
       <Stack.Screen name="about" options={{ title: "About Us" }} />
-      <Stack.Screen name="terms" options={{ title: "Terms & Conditions" }} />
       <Stack.Screen name="privacy" options={{ title: "Privacy Policy" }} />
     </Stack>
   );
