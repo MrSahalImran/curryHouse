@@ -22,7 +22,7 @@ api.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor for error handling
@@ -32,7 +32,7 @@ api.interceptors.response.use(
     const status = error.response?.status;
     const hadAuthHeader = Boolean(
       error.config?.headers?.Authorization ||
-        error.config?.headers?.authorization
+      error.config?.headers?.authorization,
     );
 
     if (status === 401 && hadAuthHeader) {
@@ -41,7 +41,7 @@ api.interceptors.response.use(
       await AsyncStorage.removeItem("userData");
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 // Auth API
