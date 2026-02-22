@@ -14,6 +14,10 @@ const orderItemSchema = new mongoose.Schema({
     min: 1,
   },
   subtotal: Number,
+  spiceLevel: {
+    type: String,
+    default: "Medium",
+  },
   // extras per item (optional) - keep flexible shape
   extras: [
     {
@@ -96,7 +100,7 @@ const orderSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Generate order number before saving

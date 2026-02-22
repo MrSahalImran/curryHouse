@@ -130,7 +130,7 @@ export default function App() {
         `${API_URL}/orders/admin/${orderId}/status`,
         {
           status,
-        }
+        },
       );
       return { success: true, data: res?.data };
     } catch (err) {
@@ -146,7 +146,7 @@ export default function App() {
 
     // Optimistically update UI
     setOrders((list) =>
-      list.map((o) => (o._id === order._id ? { ...o, status: newStatus } : o))
+      list.map((o) => (o._id === order._id ? { ...o, status: newStatus } : o)),
     );
 
     // Clear existing undo timer
@@ -168,8 +168,8 @@ export default function App() {
       // revert
       setOrders((list) =>
         list.map((o) =>
-          o._id === order._id ? { ...o, status: prevStatus } : o
-        )
+          o._id === order._id ? { ...o, status: prevStatus } : o,
+        ),
       );
       setPendingUndo(null);
       if (undoTimerRef.current) {
@@ -186,7 +186,7 @@ export default function App() {
 
     // Optimistically revert UI
     setOrders((list) =>
-      list.map((o) => (o._id === orderId ? { ...o, status: prevStatus } : o))
+      list.map((o) => (o._id === orderId ? { ...o, status: prevStatus } : o)),
     );
 
     // clear timer + pending
@@ -304,8 +304,8 @@ export default function App() {
                   {
                     orders.filter((o) =>
                       ["pending", "confirmed", "preparing", "ready"].includes(
-                        o.status
-                      )
+                        o.status,
+                      ),
                     ).length
                   }
                 </div>
@@ -504,6 +504,9 @@ export default function App() {
                                     <span className="text-xs text-slate-500">
                                       x{it.quantity || 1}
                                     </span>
+                                  </div>
+                                  <div className="text-xs text-slate-500 mt-1">
+                                    Spice: {it.spiceLevel || "Medium"}
                                   </div>
                                   {it.extras && it.extras.length > 0 ? (
                                     <div className="text-xs text-slate-500 mt-1">
