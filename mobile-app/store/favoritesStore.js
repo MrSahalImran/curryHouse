@@ -1,6 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
-import { API_URL } from "../config/config";
+import { userAPI } from "../services/api";
 import useAuthStore from "./authStore";
 
 const useFavoritesStore = create((set, get) => ({
@@ -11,11 +10,15 @@ const useFavoritesStore = create((set, get) => ({
   fetchFavorites: async () => {
     set({ loading: true, error: null });
     try {
-      const token = useAuthStore.getState().token;
-      const res = await axios.get(`${API_URL}/user/favorites`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      set({ favorites: res.data.data, loading: false });
+      const { isAuthenticated } = useAuthStore.getState();
+
+      if (!isAuthenticated) {
+        set({ favorites: [], loading: false, error: null });
+        return;
+      }
+
+      const res = await userAPI.getFavorites();
+      set({ favorites: res.data || [], loading: false });
     } catch (error) {
       set({
         error: error.response?.data?.message || error.message,
@@ -27,14 +30,13 @@ const useFavoritesStore = create((set, get) => ({
   addFavorite: async (itemId) => {
     set({ loading: true, error: null });
     try {
-      const token = useAuthStore.getState().token;
-      await axios.post(
-        `${API_URL}/user/favorites/${itemId}`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const { isAuthenticated } = useAuthStore.getState();
+      if (!isAuthenticated) {
+        set({ loading: false, error: "Please log in to use favorites" });
+        return false;
+      }
+
+      await userAPI.addFavorite(itemId);
       await get().fetchFavorites();
       set({ loading: false });
       return true;
@@ -50,10 +52,13 @@ const useFavoritesStore = create((set, get) => ({
   removeFavorite: async (itemId) => {
     set({ loading: true, error: null });
     try {
-      const token = useAuthStore.getState().token;
-      await axios.delete(`${API_URL}/user/favorites/${itemId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { isAuthenticated } = useAuthStore.getState();
+      if (!isAuthenticated) {
+        set({ loading: false, error: "Please log in to use favorites" });
+        return false;
+      }
+
+      await userAPI.removeFavorite(itemId);
       await get().fetchFavorites();
       set({ loading: false });
       return true;
